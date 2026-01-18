@@ -38,9 +38,9 @@ const lifeDomains: LifeDomain[] = [
     icon: '💪', 
     goals: [
       { id: 'g1', title: 'Gym 3x per week', progress: 2, target: 3, unit: 'sessions', type: 'weekly' },
-      { id: 'g2', title: 'Bench press 100kg', progress: 85, target: 100, unit: 'kg', type: 'deadline' },
-      { id: 'g3', title: 'Squat 120kg', progress: 105, target: 120, unit: 'kg', type: 'deadline' },
-      { id: 'g4', title: 'Deadlift 150kg', progress: 140, target: 150, unit: 'kg', type: 'deadline' }
+      { id: 'g2', title: 'Bench press 100kg', progress: 85, target: 100, unit: 'kg', type: 'deadline', deadline: '2026-02-28' },
+      { id: 'g3', title: 'Squat 120kg', progress: 105, target: 120, unit: 'kg', type: 'deadline', deadline: '2026-03-20' },
+      { id: 'g4', title: 'Deadlift 150kg', progress: 140, target: 150, unit: 'kg', type: 'deadline', deadline: '2026-04-15' }
     ] 
   },
   { 
@@ -71,8 +71,8 @@ const lifeDomains: LifeDomain[] = [
     color: '#f59e0b', 
     icon: '🚀', 
     goals: [
-      { id: 'p1', title: 'Complete MVP', progress: 75, target: 100, unit: '%', type: 'deadline' },
-      { id: 'p2', title: 'Deploy to production', progress: 30, target: 100, unit: '%', type: 'monthly' },
+      { id: 'p1', title: 'Complete MVP', progress: 75, target: 100, unit: '%', type: 'deadline', deadline: '2026-02-10' },
+      { id: 'p2', title: 'Deploy to production', progress: 30, target: 100, unit: '%', type: 'monthly', deadline: '2026-03-01' },
       { id: 'p3', title: 'Get 100 users', progress: 23, target: 100, unit: 'users', type: 'quarterly' }
     ] 
   },
@@ -108,7 +108,8 @@ function App() {
     title: '',
     target: '',
     unit: '',
-    type: 'weekly' as Goal['type']
+    type: 'weekly' as Goal['type'],
+    deadline: ''
   })
 
   const addGoal = () => {
@@ -120,7 +121,8 @@ function App() {
       progress: 0,
       target: parseInt(newGoal.target),
       unit: newGoal.unit,
-      type: newGoal.type
+      type: newGoal.type,
+      deadline: newGoal.deadline || undefined
     }
 
     setDomains(prev => prev.map(domain => 
@@ -129,7 +131,7 @@ function App() {
         : domain
     ))
 
-    setNewGoal({ domainId: newGoal.domainId, title: '', target: '', unit: '', type: 'weekly' })
+    setNewGoal({ domainId: newGoal.domainId, title: '', target: '', unit: '', type: 'weekly', deadline: '' })
   }
 
   const updateGoalProgress = (domainId: string, goalId: string, increment: number) => {
@@ -155,6 +157,25 @@ function App() {
   const overallProgress = totalGoals > 0
     ? allGoals.reduce((acc, goal) => acc + (goal.progress / goal.target) * 100, 0) / totalGoals
     : 0
+  const timelineOrder: Goal['type'][] = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'deadline']
+  const timelineGoals = [...allGoals].sort((a, b) => {
+    const orderDiff = timelineOrder.indexOf(a.type) - timelineOrder.indexOf(b.type)
+    if (orderDiff !== 0) return orderDiff
+    if (a.deadline && b.deadline) return a.deadline.localeCompare(b.deadline)
+    if (a.deadline) return -1
+    if (b.deadline) return 1
+    return a.title.localeCompare(b.title)
+  })
+  const groupedTimeline = timelineOrder.map(type => ({
+    type,
+    goals: timelineGoals.filter(goal => goal.type === type)
+  })).filter(group => group.goals.length > 0)
+  const formatDeadline = (value?: string) => {
+    if (!value) return 'No date set'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return 'No date set'
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
 
   return (
     <div className="app">
@@ -231,6 +252,14 @@ function App() {
                   <option value="deadline">Deadline</option>
                 </select>
                 <button onClick={addGoal} className="primary">Add goal</button>
+              </div>
+              <div className="form-row">
+                <input
+                  type="date"
+                  value={newGoal.deadline}
+                  onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
+                />
+                <div className="form-hint">Optional deadline</div>
               </div>
             </div>
           </div>
@@ -362,6 +391,48 @@ function App() {
                   </div>
                 )
               })}
+          </div>
+        </section>
+
+        <section className="timeline-section">
+          <div className="timeline-header">
+            <div>
+              <h2>Timeline view</h2>
+              <p>Scan goals by time horizon to keep deadlines in view.</p>
+            </div>
+            <div className="timeline-legend">
+              <span className="legend-dot" /> Planned cadence
+            </div>
+          </div>
+          <div className="timeline-grid">
+            {groupedTimeline.map(group => (
+              <div key={group.type} className="timeline-column">
+                <div className={`timeline-title ${group.type}`}>{group.type}</div>
+                <div className="timeline-items">
+                  {group.goals.map(goal => (
+                    <div key={goal.id} className="timeline-item">
+                      <div className="timeline-marker" style={{ backgroundColor: goal.domainColor }} />
+                      <div>
+                        <div className="timeline-name">{goal.title}</div>
+                        <div className="timeline-meta">
+                          <span>{goal.domainIcon} {goal.domainName}</span>
+                          <span>{formatDeadline(goal.deadline)}</span>
+                        </div>
+                      </div>
+                      <div className="timeline-progress">
+                        <span>{Math.round((goal.progress / goal.target) * 100)}%</span>
+                        <div className="progress-bar">
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${(goal.progress / goal.target) * 100}%`, backgroundColor: goal.domainColor }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       </main>
