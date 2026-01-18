@@ -102,9 +102,9 @@ const lifeDomains: LifeDomain[] = [
 
 function App() {
   const [domains, setDomains] = useState<LifeDomain[]>(lifeDomains)
-  const [selectedDomain, setSelectedDomain] = useState<string | null>(null)
-  const [showGoalForm, setShowGoalForm] = useState(false)
+  const [selectedDomain, setSelectedDomain] = useState<string>('all')
   const [newGoal, setNewGoal] = useState({
+    domainId: lifeDomains[0]?.id ?? '',
     title: '',
     target: '',
     unit: '',
@@ -112,7 +112,7 @@ function App() {
   })
 
   const addGoal = () => {
-    if (!selectedDomain || !newGoal.title || !newGoal.target || !newGoal.unit) return
+    if (!newGoal.domainId || !newGoal.title || !newGoal.target || !newGoal.unit) return
 
     const goal: Goal = {
       id: Date.now().toString(),
@@ -124,13 +124,12 @@ function App() {
     }
 
     setDomains(prev => prev.map(domain => 
-      domain.id === selectedDomain 
+      domain.id === newGoal.domainId
         ? { ...domain, goals: [...domain.goals, goal] }
         : domain
     ))
 
-    setNewGoal({ title: '', target: '', unit: '', type: 'weekly' })
-    setShowGoalForm(false)
+    setNewGoal({ domainId: newGoal.domainId, title: '', target: '', unit: '', type: 'weekly' })
   }
 
   const updateGoalProgress = (domainId: string, goalId: string, increment: number) => {
@@ -148,26 +147,106 @@ function App() {
     ))
   }
 
+  const allGoals = domains.flatMap(domain =>
+    domain.goals.map(goal => ({ ...goal, domainId: domain.id, domainName: domain.name, domainColor: domain.color, domainIcon: domain.icon }))
+  )
+  const totalGoals = allGoals.length
+  const completedGoals = allGoals.filter(goal => goal.progress >= goal.target).length
+  const overallProgress = totalGoals > 0
+    ? allGoals.reduce((acc, goal) => acc + (goal.progress / goal.target) * 100, 0) / totalGoals
+    : 0
+
   return (
     <div className="app">
       <header className="header">
         <h1>Life Planner</h1>
-        <p>Track your progress across all life domains</p>
+        <p>Focus on what matters, and see every goal move forward together.</p>
       </header>
 
       <main className="main">
-        <div className="domains-grid">
+        <section className="overview">
+          <div className="overview-card">
+            <p className="eyebrow">Overall Momentum</p>
+            <div className="overview-value">{Math.round(overallProgress)}%</div>
+            <div className="progress-bar large">
+              <div className="progress-fill" style={{ width: `${overallProgress}%` }} />
+            </div>
+            <p className="overview-subtext">{completedGoals} of {totalGoals} goals completed</p>
+          </div>
+          <div className="overview-card stats">
+            <div className="stat">
+              <span className="stat-number">{domains.length}</span>
+              <span className="stat-label">Domains</span>
+            </div>
+            <div className="stat">
+              <span className="stat-number">{totalGoals}</span>
+              <span className="stat-label">Goals</span>
+            </div>
+            <div className="stat">
+              <span className="stat-number">{completedGoals}</span>
+              <span className="stat-label">Completed</span>
+            </div>
+          </div>
+          <div className="overview-card form-card">
+            <h3>Quick add goal</h3>
+            <div className="goal-form">
+              <select
+                value={newGoal.domainId}
+                onChange={(e) => setNewGoal({ ...newGoal, domainId: e.target.value })}
+              >
+                {domains.map(domain => (
+                  <option key={domain.id} value={domain.id}>{domain.name}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                placeholder="Goal title"
+                value={newGoal.title}
+                onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
+              />
+              <div className="form-row">
+                <input
+                  type="number"
+                  placeholder="Target"
+                  value={newGoal.target}
+                  onChange={(e) => setNewGoal({ ...newGoal, target: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Unit (e.g., km, sessions)"
+                  value={newGoal.unit}
+                  onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
+                />
+              </div>
+              <div className="form-row">
+                <select
+                  value={newGoal.type}
+                  onChange={(e) => setNewGoal({ ...newGoal, type: e.target.value as Goal['type'] })}
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="deadline">Deadline</option>
+                </select>
+                <button onClick={addGoal} className="primary">Add goal</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="domains-grid">
           {domains.map((domain) => {
             const totalProgress = domain.goals.reduce((acc, goal) => acc + (goal.progress / goal.target) * 100, 0)
             const avgProgress = domain.goals.length > 0 ? totalProgress / domain.goals.length : 0
-            const completedGoals = domain.goals.filter(goal => goal.progress >= goal.target).length
+            const completedDomainGoals = domain.goals.filter(goal => goal.progress >= goal.target).length
             
             return (
               <div
                 key={domain.id}
                 className="domain-card"
                 style={{ borderColor: domain.color }}
-                onClick={() => setSelectedDomain(domain.id)}
               >
                 <div className="domain-header">
                   <span className="domain-icon">{domain.icon}</span>
@@ -179,7 +258,7 @@ function App() {
                     <span className="stat-label">goals</span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-number">{completedGoals}</span>
+                    <span className="stat-number">{completedDomainGoals}</span>
                     <span className="stat-label">done</span>
                   </div>
                 </div>
@@ -200,25 +279,47 @@ function App() {
               </div>
             )
           })}
-        </div>
+        </section>
 
-        {selectedDomain && (
-          <div className="domain-detail">
-            <div className="domain-detail-header">
-              <button onClick={() => setSelectedDomain(null)}>← Back</button>
-              <h2>{domains.find(d => d.id === selectedDomain)?.name}</h2>
-              <button onClick={() => setShowGoalForm(true)}>+ Add Goal</button>
+        <section className="goals-section">
+          <div className="goals-header">
+            <div>
+              <h2>All goals at a glance</h2>
+              <p>Adjust progress without jumping between screens.</p>
             </div>
-            
-            <div className="goals-list">
-              {domains.find(d => d.id === selectedDomain)?.goals.map(goal => {
+            <div className="domain-filters">
+              <button
+                className={selectedDomain === 'all' ? 'active' : ''}
+                onClick={() => setSelectedDomain('all')}
+              >
+                All domains
+              </button>
+              {domains.map(domain => (
+                <button
+                  key={domain.id}
+                  className={selectedDomain === domain.id ? 'active' : ''}
+                  onClick={() => setSelectedDomain(domain.id)}
+                >
+                  {domain.icon} {domain.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="goals-list">
+            {allGoals
+              .filter(goal => selectedDomain === 'all' || goal.domainId === selectedDomain)
+              .map(goal => {
                 const isCompleted = goal.progress >= goal.target
                 const progressPercentage = (goal.progress / goal.target) * 100
-                
                 return (
                   <div key={goal.id} className={`goal-card ${isCompleted ? 'completed' : ''}`}>
                     <div className="goal-header">
-                      <h4>{goal.title}</h4>
+                      <div>
+                        <span className="goal-domain" style={{ color: goal.domainColor }}>
+                          {goal.domainIcon} {goal.domainName}
+                        </span>
+                        <h4>{goal.title}</h4>
+                      </div>
                       <span className={`goal-type ${goal.type}`}>{goal.type}</span>
                     </div>
                     <div className="progress-section">
@@ -227,7 +328,7 @@ function App() {
                           className="progress-fill" 
                           style={{ 
                             width: `${progressPercentage}%`,
-                            backgroundColor: domains.find(d => d.id === selectedDomain)?.color
+                            backgroundColor: goal.domainColor
                           }}
                         />
                       </div>
@@ -240,7 +341,7 @@ function App() {
                     </div>
                     <div className="goal-actions">
                       <button 
-                        onClick={() => updateGoalProgress(selectedDomain, goal.id, 1)}
+                        onClick={() => updateGoalProgress(goal.domainId, goal.id, 1)}
                         className="progress-btn"
                         disabled={isCompleted}
                       >
@@ -248,7 +349,7 @@ function App() {
                       </button>
                       {goal.progress > 0 && (
                         <button 
-                          onClick={() => updateGoalProgress(selectedDomain, goal.id, -1)}
+                          onClick={() => updateGoalProgress(goal.domainId, goal.id, -1)}
                           className="progress-btn negative"
                         >
                           -1
@@ -261,52 +362,8 @@ function App() {
                   </div>
                 )
               })}
-            </div>
-
-            {showGoalForm && (
-              <div className="goal-form-overlay">
-                <div className="goal-form">
-                  <h3>Add New Goal</h3>
-                  <input
-                    type="text"
-                    placeholder="Goal title"
-                    value={newGoal.title}
-                    onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
-                  />
-                  <div className="form-row">
-                    <input
-                      type="number"
-                      placeholder="Target"
-                      value={newGoal.target}
-                      onChange={(e) => setNewGoal({...newGoal, target: e.target.value})}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Unit (e.g., km, problems)"
-                      value={newGoal.unit}
-                      onChange={(e) => setNewGoal({...newGoal, unit: e.target.value})}
-                    />
-                  </div>
-                  <select
-                    value={newGoal.type}
-                    onChange={(e) => setNewGoal({...newGoal, type: e.target.value as Goal['type']})}
-                  >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="deadline">Deadline</option>
-                  </select>
-                  <div className="form-actions">
-                    <button onClick={() => setShowGoalForm(false)}>Cancel</button>
-                    <button onClick={addGoal} className="primary">Add Goal</button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        )}
+        </section>
       </main>
     </div>
   )
