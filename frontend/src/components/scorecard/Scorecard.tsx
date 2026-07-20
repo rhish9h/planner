@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Check, Flame, Trash2, Plus, Minus, MoreHorizontal } from "lucide-react";
+import { Pencil, Check, Flame, Trash2, Plus, MoreHorizontal, History } from "lucide-react";
 import IconPicker from "../iconPicker/IconPicker";
 import { getAreaIcon } from "../iconPicker/iconOptions";
 import { computePace } from "../../utils/pace";
@@ -10,23 +10,29 @@ export interface ScorecardData {
   area: string
   icon: string
   color?: string
-  current: number
   target: number
-  history: string[]
+  startingCount: number
+  activities: Activity[]
+}
+
+export interface Activity {
+  id: string
+  loggedAt: string
+  description?: string
+  url?: string
 }
 
 interface ScorecardProps {
   data: ScorecardData
   daysElapsed: number
   totalDays: number
-  onUpdate: (id: string, current: number) => void
   onIconChange: (id: string, icon: string) => void
   onColorChange: (id: string, color: string) => void
   onAreaChange: (id: string, area: string) => void
   onTargetChange: (id: string, target: number) => void
   onDelete: (id: string) => void
-  onLogDate: (id: string) => void
-  onRemoveDate: (id: string) => void
+  onLogActivity: (id: string) => void
+  onViewHistory: (id: string) => void
 }
 
 const getProgressClass = (percentage: number) => {
@@ -36,36 +42,18 @@ const getProgressClass = (percentage: number) => {
   return "low"
 }
 
-const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onColorChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
+const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, onAreaChange, onTargetChange, onDelete, onLogActivity, onViewHistory }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const AreaIcon = getAreaIcon(data.icon)
-  const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
+  const current = data.startingCount + data.activities.length
+  const percentage = data.target > 0 ? Math.round((current / data.target) * 100) : 0
   const progressClass = getProgressClass(percentage)
   const isCompleted = percentage === 100
-  const pace = computePace(data.current, data.target, daysElapsed, totalDays)
-  const currentStreak = computeCurrentStreak(data.history)
-  const bestStreak = computeBestStreak(data.history)
-  const loggedToday = data.history.includes(todayKey())
-
-  const handleIncrement = () => {
-    onUpdate(data.id, data.current + 1)
-    onLogDate(data.id)
-  }
-
-  const handleDecrement = () => {
-    if (data.current > 0) {
-      onUpdate(data.id, data.current - 1)
-      if (data.history.length > 0) {
-        onRemoveDate(data.id)
-      }
-    }
-  }
-
-  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10) || 0
-    onUpdate(data.id, Math.max(0, Math.min(value, data.target)))
-  }
+  const pace = computePace(current, data.target, daysElapsed, totalDays)
+  const activityDays = data.activities.map(activity => todayKey(new Date(activity.loggedAt)))
+  const currentStreak = computeCurrentStreak(activityDays)
+  const bestStreak = computeBestStreak(activityDays)
 
   return (
     <div className="scorecard">
@@ -160,7 +148,7 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onCol
       )}
       
       <div className="scorecard-progress">
-        <span className="progress-text">{data.current} <span className="progress-divider">/</span> {data.target}</span>
+        <span className="progress-text">{current} <span className="progress-divider">/</span> {data.target}</span>
         <span className={`percentage ${progressClass}`}>{percentage}%</span>
       </div>
 
@@ -172,37 +160,19 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onCol
 
       <div className="scorecard-controls">
         <button
-          className="control-button"
-          onClick={handleDecrement}
-          disabled={data.current <= 0}
-          aria-label="Decrease progress"
+          className="activity-action-button history-button"
+          onClick={() => onViewHistory(data.id)}
+          aria-label={`View ${data.area} activity history`}
         >
-          <Minus size={16} />
-        </button>
-        <input
-          type="number"
-          value={data.current}
-          onChange={handleProgressChange}
-          min={0}
-          max={data.target}
-          aria-label="Current progress"
-        />
-        <button
-          className="control-button"
-          onClick={handleIncrement}
-          disabled={data.current >= data.target}
-          aria-label="Increase progress"
-        >
-          <Plus size={16} />
+          <History size={16} /> History
         </button>
         {!isCompleted ? (
           <button
-            className={`log-today-button ${loggedToday ? "logged" : ""}`}
-            onClick={handleIncrement}
-            disabled={loggedToday}
-            aria-label={loggedToday ? "Already logged today" : "Log today's progress"}
+            className="activity-action-button log-today-button"
+            onClick={() => onLogActivity(data.id)}
+            aria-label={`Log an activity for ${data.area}`}
           >
-            {loggedToday ? "Logged" : "Log today"}
+            <Plus size={16} /> Log
           </button>
         ) : (
           <span className="completed-badge"><Check size={12} /> Done</span>

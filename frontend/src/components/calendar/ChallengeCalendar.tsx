@@ -9,13 +9,15 @@ interface ChallengeCalendarProps {
   onStartDateChange: (key: string) => void
   totalDays?: number
   scorecards: ScorecardData[]
+  onDateSelect: (dateKey: string) => void
 }
 
-const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, scorecards }: ChallengeCalendarProps) => {
+const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, scorecards, onDateSelect }: ChallengeCalendarProps) => {
   const logCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     scorecards.forEach(card => {
-      card.history.forEach(dateKey => {
+      card.activities.forEach(activity => {
+        const dateKey = formatDate(new Date(activity.loggedAt))
         counts[dateKey] = (counts[dateKey] || 0) + 1
       })
     })
@@ -28,7 +30,8 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
     scorecards.forEach((card, index) => {
       const color = card.color || getDefaultScorecardColor(index)
       const seen = new Set<string>()
-      card.history.forEach(dateKey => {
+      card.activities.forEach(activity => {
+        const dateKey = formatDate(new Date(activity.loggedAt))
         if (seen.has(dateKey)) return
         seen.add(dateKey)
         if (!colors[dateKey]) {
@@ -204,6 +207,15 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
           return (
             <div
               key={idx}
+              role={cell.isInRange ? "button" : undefined}
+              tabIndex={cell.isInRange ? 0 : undefined}
+              onClick={() => cell.isInRange && onDateSelect(cell.dateKey)}
+              onKeyDown={event => {
+                if (cell.isInRange && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault()
+                  onDateSelect(cell.dateKey)
+                }
+              }}
               className={`calendar-cell ${getHeatClass(cell.count, cell.isFuture, cell.isInRange)} ${cell.isToday && cell.isInRange ? "today" : ""}`}
               title={title}
               style={ringGradient ? ({ "--ring-gradient": ringGradient } as React.CSSProperties) : undefined}

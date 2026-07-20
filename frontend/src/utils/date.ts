@@ -13,7 +13,7 @@ export const startOfDay = (d: Date) => {
   return copy
 }
 
-export const todayKey = () => formatDateLocal(new Date())
+export const todayKey = (date = new Date()) => formatDateLocal(date)
 
 export const daysBetween = (from: Date, to: Date) => {
   return Math.floor((startOfDay(to).getTime() - startOfDay(from).getTime()) / MS_PER_DAY)
