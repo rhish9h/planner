@@ -133,16 +133,6 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
 
       <span className={`pace-badge pace-${pace.className}`}>{pace.label}</span>
 
-      {!isCompleted && (
-        <button
-          className={`log-today-button ${loggedToday ? "logged" : ""}`}
-          onClick={handleIncrement}
-          aria-label="Log today's progress"
-        >
-          {loggedToday ? "✓ Logged today — add more" : "Log today"}
-        </button>
-      )}
-
       <div className="scorecard-controls">
         <button
           className="control-button"
@@ -152,9 +142,9 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
         >
           −
         </button>
-        <input 
-          type="number" 
-          value={data.current} 
+        <input
+          type="number"
+          value={data.current}
           onChange={handleProgressChange}
           min={0}
           max={data.target}
@@ -168,7 +158,17 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
         >
           +
         </button>
-        {bestStreak > 0 && <span className="best-streak-note">Best streak: {bestStreak}d</span>}
+        {!isCompleted ? (
+          <button
+            className={`log-today-button ${loggedToday ? "logged" : ""}`}
+            onClick={handleIncrement}
+            aria-label="Log today's progress"
+          >
+            {loggedToday ? "Logged" : "Log today"}
+          </button>
+        ) : (
+          <span className="completed-badge">✓ Done</span>
+        )}
       </div>
     </div>
   )

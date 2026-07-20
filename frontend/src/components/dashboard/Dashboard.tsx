@@ -127,7 +127,7 @@ const Dashboard = () => {
   }
 
   const addAreaCard = addExpanded ? (
-    <div className="scorecard add-scorecard-form-card">
+    <div className="scorecard add-scorecard-form-card" style={{ gridColumn: '1 / -1' }}>
       <div className="add-scorecard-form-header">
         <span className="add-scorecard-title">Add area</span>
         <button
@@ -163,10 +163,12 @@ const Dashboard = () => {
     <button
       type="button"
       className="scorecard add-scorecard-button"
+      style={{ gridColumn: '1 / -1' }}
       onClick={() => setAddExpanded(true)}
       aria-label="Add a new area"
     >
       <span className="add-scorecard-button-icon">+</span>
+      <span className="add-scorecard-button-label">Add area</span>
     </button>
   )
 
@@ -203,59 +205,60 @@ const Dashboard = () => {
         </section>
       )}
 
-      <section className="scorecard-section">
-        <h2 className="scorecard-section-title">Your areas</h2>
-        {scorecards.length > 0 ? (
-          <div className="scorecard-grid">
-            {scorecards.map(card => (
-              <Scorecard
-                key={card.id}
-                data={card}
-                daysElapsed={daysElapsed}
-                totalDays={TOTAL_DAYS}
-                onUpdate={handleUpdate}
-                onIconChange={handleIconChange}
-                onAreaChange={handleAreaChange}
-                onTargetChange={handleTargetChange}
-                onDelete={handleDelete}
-                onLogDate={handleLogDate}
-                onRemoveDate={handleRemoveDate}
-              />
-            ))}
-            {addAreaCard}
-          </div>
-        ) : addExpanded ? (
-          <div className="scorecard-grid">{addAreaCard}</div>
-        ) : (
-          <div className="empty-state">
-            <div className="empty-state-icon">🎯</div>
-            <p>No areas yet.</p>
-            <button
-              type="button"
-              className="add-scorecard-empty-button"
-              onClick={() => setAddExpanded(true)}
-              aria-label="Add a new area"
-            >
-              <span className="add-scorecard-button-icon">+</span>
-            </button>
-          </div>
-        )}
-      </section>
+      <div className="dashboard-content">
+        <section className="scorecard-section">
+          <h2 className="scorecard-section-title">Your areas</h2>
+          {scorecards.length > 0 ? (
+            <div className="scorecard-grid">
+              {scorecards.map(card => (
+                <Scorecard
+                  key={card.id}
+                  data={card}
+                  daysElapsed={daysElapsed}
+                  totalDays={TOTAL_DAYS}
+                  onUpdate={handleUpdate}
+                  onIconChange={handleIconChange}
+                  onAreaChange={handleAreaChange}
+                  onTargetChange={handleTargetChange}
+                  onDelete={handleDelete}
+                  onLogDate={handleLogDate}
+                  onRemoveDate={handleRemoveDate}
+                />
+              ))}
+              {addAreaCard}
+            </div>
+          ) : addExpanded ? (
+            <div className="scorecard-grid">{addAreaCard}</div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-icon">🎯</div>
+              <p>No areas yet.</p>
+              <button
+                type="button"
+                className="add-scorecard-empty-button"
+                onClick={() => setAddExpanded(true)}
+                aria-label="Add a new area"
+              >
+                <span className="add-scorecard-button-icon">+</span>
+              </button>
+            </div>
+          )}
+        </section>
 
-      <section className="calendar-section">
-        <div className="calendar-section-header">
-          <h2 className="calendar-section-title">90-Day View</h2>
-          <label className="calendar-start-label">
-            Start date
-            <input
-              type="date"
-              value={challengeStartKey}
-              onChange={(e) => setChallengeStartKey(e.target.value)}
-            />
-          </label>
-        </div>
-        <ChallengeCalendar startDate={challengeStart} totalDays={TOTAL_DAYS} scorecards={scorecards} />
-      </section>
+        <section className="calendar-section">
+          <div className="calendar-section-header">
+            <label className="calendar-start-label">
+              Start date
+              <input
+                type="date"
+                value={challengeStartKey}
+                onChange={(e) => setChallengeStartKey(e.target.value)}
+              />
+            </label>
+          </div>
+          <ChallengeCalendar startDate={challengeStart} totalDays={TOTAL_DAYS} scorecards={scorecards} />
+        </section>
+      </div>
     </div>
   )
 }
