@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Check, Flame, Trash2, Plus, Minus } from "lucide-react";
+import { Pencil, Check, Flame, Trash2, Plus, Minus, MoreHorizontal } from "lucide-react";
 import IconPicker from "../iconPicker/IconPicker";
 import { getAreaIcon } from "../iconPicker/iconOptions";
 import { computePace } from "../../utils/pace";
@@ -38,6 +38,7 @@ const getProgressClass = (percentage: number) => {
 
 const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onColorChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const AreaIcon = getAreaIcon(data.icon)
   const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
   const progressClass = getProgressClass(percentage)
@@ -84,17 +85,39 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onCol
           </div>
         </div>
         <div className="scorecard-actions">
-          <button 
-            className="edit-button" 
-            onClick={() => setIsEditing(prev => !prev)}
-            aria-label={isEditing ? "Done editing" : "Edit scorecard"}
-            aria-expanded={isEditing}
+          <button
+            type="button"
+            className="scorecard-menu-button"
+            onClick={() => setSettingsOpen(open => !open)}
+            aria-label="Scorecard options"
+            aria-expanded={settingsOpen}
           >
-            {isEditing ? <Check size={16} /> : <Pencil size={16} />}
+            <MoreHorizontal size={18} />
           </button>
-          <button className="delete-button" onClick={() => onDelete(data.id)} aria-label="Delete scorecard">
-            <Trash2 size={18} />
-          </button>
+          {settingsOpen && (
+            <div className="scorecard-action-menu">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditing(editing => !editing)
+                  setSettingsOpen(false)
+                }}
+                aria-label={isEditing ? "Done editing" : "Edit scorecard"}
+              >
+                {isEditing ? <Check size={15} /> : <Pencil size={15} />}
+                {isEditing ? "Done editing" : "Edit"}
+              </button>
+              <button
+                type="button"
+                className="scorecard-action-menu-delete"
+                onClick={() => onDelete(data.id)}
+                aria-label="Delete scorecard"
+              >
+                <Trash2 size={15} />
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

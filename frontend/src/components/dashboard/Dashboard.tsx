@@ -62,7 +62,7 @@ const Dashboard = () => {
 
     const onPaceCount = scorecards.filter(card => {
       const { className } = computePace(card.current, card.target, daysElapsed, TOTAL_DAYS)
-      return className === "complete" || className === "ahead" || className === "on-pace"
+      return className === "complete" || className === "ahead" || className === "on-pace" || className === "starting"
     }).length
 
     const allHistoryDays = Array.from(new Set(scorecards.flatMap(card => card.history)))

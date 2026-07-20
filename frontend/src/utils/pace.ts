@@ -1,4 +1,4 @@
-export type PaceClass = "complete" | "ahead" | "on-pace" | "behind" | "attention" | "upcoming"
+export type PaceClass = "complete" | "ahead" | "on-pace" | "behind" | "attention" | "upcoming" | "starting"
 
 export interface Pace {
   label: string
@@ -12,6 +12,12 @@ export const computePace = (current: number, target: number, daysElapsed: number
 
   if (daysElapsed <= 0) {
     return { label: "Starts soon", className: "upcoming" }
+  }
+
+  // The first few days do not provide enough signal for a useful pace call.
+  // Avoid implying that an untouched goal is already performing well.
+  if (daysElapsed <= 3) {
+    return { label: "Getting started", className: "starting" }
   }
 
   const actualPct = target > 0 ? (current / target) * 100 : 0
