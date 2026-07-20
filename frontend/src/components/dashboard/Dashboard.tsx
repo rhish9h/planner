@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [newTarget, setNewTarget] = useState("")
   const [newIcon, setNewIcon] = useState(iconOptions[0])
   const [challengeStartKey, setChallengeStartKey] = useLocalStorage<string>("tracker.challengeStart", () => todayKey())
+  const [addExpanded, setAddExpanded] = useState(false)
 
   const challengeStart = useMemo(() => {
     const [y, m, d] = challengeStartKey.split("-").map(Number)
@@ -122,7 +123,52 @@ const Dashboard = () => {
     setNewArea("")
     setNewTarget("")
     setNewIcon(iconOptions[0])
+    setAddExpanded(false)
   }
+
+  const addAreaCard = addExpanded ? (
+    <div className="scorecard add-scorecard-form-card">
+      <div className="add-scorecard-form-header">
+        <span className="add-scorecard-title">Add area</span>
+        <button
+          type="button"
+          className="add-scorecard-close"
+          onClick={() => setAddExpanded(false)}
+          aria-label="Cancel"
+        >
+          ×
+        </button>
+      </div>
+      <form className="add-scorecard-form" onSubmit={handleAdd}>
+        <input
+          type="text"
+          placeholder="Area (e.g. Leetcode)"
+          value={newArea}
+          onChange={(e) => setNewArea(e.target.value)}
+          aria-label="Area name"
+        />
+        <input
+          type="number"
+          placeholder="Target"
+          value={newTarget}
+          onChange={(e) => setNewTarget(e.target.value)}
+          min={1}
+          aria-label="Target value"
+        />
+        <IconPicker selectedIcon={newIcon} onSelect={setNewIcon} />
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  ) : (
+    <button
+      type="button"
+      className="scorecard add-scorecard-button"
+      onClick={() => setAddExpanded(true)}
+      aria-label="Add a new area"
+    >
+      <span className="add-scorecard-button-icon">+</span>
+    </button>
+  )
 
   return (
     <div className="dashboard">
@@ -176,36 +222,24 @@ const Dashboard = () => {
                 onRemoveDate={handleRemoveDate}
               />
             ))}
+            {addAreaCard}
           </div>
+        ) : addExpanded ? (
+          <div className="scorecard-grid">{addAreaCard}</div>
         ) : (
           <div className="empty-state">
             <div className="empty-state-icon">🎯</div>
-            <p>No areas yet. Add your first goal below.</p>
+            <p>No areas yet.</p>
+            <button
+              type="button"
+              className="add-scorecard-empty-button"
+              onClick={() => setAddExpanded(true)}
+              aria-label="Add a new area"
+            >
+              <span className="add-scorecard-button-icon">+</span>
+            </button>
           </div>
         )}
-      </section>
-
-      <section className="add-scorecard-card">
-        <h2 className="add-scorecard-title">Add a new area</h2>
-        <form className="add-scorecard-form" onSubmit={handleAdd}>
-          <input
-            type="text"
-            placeholder="Area (e.g. Leetcode)"
-            value={newArea}
-            onChange={(e) => setNewArea(e.target.value)}
-            aria-label="Area name"
-          />
-          <input
-            type="number"
-            placeholder="Target"
-            value={newTarget}
-            onChange={(e) => setNewTarget(e.target.value)}
-            min={1}
-            aria-label="Target value"
-          />
-          <IconPicker selectedIcon={newIcon} onSelect={setNewIcon} />
-          <button type="submit">Add area</button>
-        </form>
       </section>
 
       <section className="calendar-section">

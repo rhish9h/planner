@@ -398,20 +398,71 @@ body {
   transition: width 0.3s ease;
 }
 
-.add-scorecard-card {
+.scorecard.add-scorecard-button,
+.add-scorecard-empty-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--primary);
+  border-style: dashed;
+  border-color: var(--primary);
   background: var(--card);
-  border-radius: 12px;
-  padding: 14px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  margin-bottom: 16px;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.scorecard.add-scorecard-button {
+  min-height: 80px;
+}
+
+.scorecard.add-scorecard-button:hover,
+.add-scorecard-empty-button:hover {
+  color: white;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.add-scorecard-empty-button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border-width: 1px;
+}
+
+.add-scorecard-button-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.add-scorecard-form-card {
+  position: relative;
+}
+
+.add-scorecard-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .add-scorecard-title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 10px;
   color: var(--text);
+}
+
+.add-scorecard-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+
+.add-scorecard-close:hover {
+  color: var(--danger);
 }
 
 .add-scorecard-form {
