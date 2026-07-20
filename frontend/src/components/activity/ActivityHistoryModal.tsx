@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight, ExternalLink, Trash2, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, ExternalLink, Pencil, Trash2, X } from "lucide-react"
 import type { Activity } from "../scorecard/Scorecard"
 
 interface ActivityHistoryModalProps {
@@ -7,12 +7,13 @@ interface ActivityHistoryModalProps {
   activities: Activity[]
   onClose: () => void
   onDelete: (id: string) => void
+  onEdit: (activity: Activity) => void
 }
 
 const formatTimestamp = (value: string) => new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
 const PAGE_SIZE = 5
 
-const ActivityHistoryModal = ({ areaName, activities, onClose, onDelete }: ActivityHistoryModalProps) => {
+const ActivityHistoryModal = ({ areaName, activities, onClose, onDelete, onEdit }: ActivityHistoryModalProps) => {
   const [page, setPage] = useState(0)
   const pageCount = Math.max(1, Math.ceil(activities.length / PAGE_SIZE))
   const visibleActivities = activities.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
@@ -41,7 +42,10 @@ const ActivityHistoryModal = ({ areaName, activities, onClose, onDelete }: Activ
               {activity.url && <a href={activity.url} target="_blank" rel="noreferrer">Open link <ExternalLink size={14} /></a>}
               {!activity.description && !activity.url && <p className="activity-quick-log">Quick log</p>}
             </div>
-            <button type="button" className="activity-delete" onClick={() => onDelete(activity.id)} aria-label="Delete this activity"><Trash2 size={16} /></button>
+            <div className="activity-actions">
+              <button type="button" className="activity-edit" onClick={() => onEdit(activity)} aria-label="Edit this activity"><Pencil size={16} /></button>
+              <button type="button" className="activity-delete" onClick={() => onDelete(activity.id)} aria-label="Delete this activity"><Trash2 size={16} /></button>
+            </div>
           </article>
           )) : <p className="empty-activity-state">No activities logged yet.</p>}
         </div>

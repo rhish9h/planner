@@ -1149,7 +1149,8 @@ input[type="color"]:focus {
 }
 
 .modal-close,
-.activity-delete {
+.activity-delete,
+.activity-edit {
   display: inline-grid;
   place-items: center;
   width: 2rem;
@@ -1165,6 +1166,16 @@ input[type="color"]:focus {
 .activity-delete:hover {
   background: #f1f5f9;
   color: #dc2626;
+}
+
+.activity-edit:hover {
+  background: #f1f5f9;
+  color: #4f46e5;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 0.15rem;
 }
 
 .log-activity-modal form,

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
 import { Plus, X, Target, Flame } from "lucide-react";
-import Scorecard, { type ScorecardData } from "../scorecard/Scorecard";
+import Scorecard, { type Activity, type ScorecardData } from "../scorecard/Scorecard";
 import ChallengeCalendar from "../calendar/ChallengeCalendar";
 import IconPicker from "../iconPicker/IconPicker";
 import LogActivityModal from "../activity/LogActivityModal";
 import ActivityHistoryModal from "../activity/ActivityHistoryModal";
 import DayActivitiesModal from "../activity/DayActivitiesModal";
+import EditActivityModal from "../activity/EditActivityModal";
 import { iconOptions, migrateIcon } from "../iconPicker/iconOptions";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { computeCurrentStreak, computeBestStreak, daysBetween, todayKey } from "../../utils/date";
@@ -33,6 +34,11 @@ type LegacyScorecard = Omit<ScorecardData, "startingCount" | "activities"> & {
 interface LoggingContext {
   areaId?: string
   dateKey: string
+}
+
+interface EditingActivityContext {
+  areaId: string
+  activity: Activity
 }
 
 const normalizeScorecards = (cards: Array<ScorecardData | LegacyScorecard>): ScorecardData[] => cards.map((card, index) => {
@@ -71,6 +77,7 @@ const Dashboard = () => {
   const [newColor, setNewColor] = useState<string>(() => getDefaultScorecardColor(scorecards.length))
   const [loggingContext, setLoggingContext] = useState<LoggingContext | null>(null)
   const [historyAreaId, setHistoryAreaId] = useState<string | null>(null)
+  const [editingActivity, setEditingActivity] = useState<EditingActivityContext | null>(null)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
 
   useEffect(() => {
@@ -168,6 +175,23 @@ const Dashboard = () => {
       if (card.id !== historyAreaId) return card
       return { ...card, activities: card.activities.filter(activity => activity.id !== id) }
     }))
+  }
+
+  const handleEditActivity = (activity: Activity, dateKey: string, description: string, url: string) => {
+    if (!editingActivity) return
+    setScorecards(prev => prev.map(card => {
+      if (card.id !== editingActivity.areaId) return card
+      return {
+        ...card,
+        activities: card.activities.map(current => current.id === activity.id ? {
+          ...current,
+          loggedAt: new Date(`${dateKey}T12:00:00`).toISOString(),
+          ...(description ? { description } : { description: undefined }),
+          ...(url ? { url } : { url: undefined }),
+        } : current),
+      }
+    }))
+    setEditingActivity(null)
   }
 
   const handleAdd = (e: React.FormEvent) => {
@@ -337,7 +361,14 @@ const Dashboard = () => {
       />}
       {historyAreaId && (() => {
         const area = scorecards.find(card => card.id === historyAreaId)
-        return area ? <ActivityHistoryModal areaName={area.area} activities={[...area.activities].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt))} onClose={() => setHistoryAreaId(null)} onDelete={handleDeleteActivity} /> : null
+        return area ? <ActivityHistoryModal areaName={area.area} activities={[...area.activities].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt))} onClose={() => setHistoryAreaId(null)} onDelete={handleDeleteActivity} onEdit={activity => {
+          setHistoryAreaId(null)
+          setEditingActivity({ areaId: area.id, activity })
+        }} /> : null
+      })()}
+      {editingActivity && (() => {
+        const area = scorecards.find(card => card.id === editingActivity.areaId)
+        return area ? <EditActivityModal areaName={area.area} activity={editingActivity.activity} onClose={() => setEditingActivity(null)} onSubmit={handleEditActivity} /> : null
       })()}
       {selectedCalendarDate && <DayActivitiesModal dateKey={selectedCalendarDate} scorecards={scorecards} onClose={() => setSelectedCalendarDate(null)} onLogActivity={dateKey => {
         setSelectedCalendarDate(null)
