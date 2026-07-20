@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Plus, X, Target, Flame } from "lucide-react";
 import Scorecard, { type ScorecardData } from "../scorecard/Scorecard";
 import ChallengeCalendar from "../calendar/ChallengeCalendar";
 import IconPicker from "../iconPicker/IconPicker";
-import { iconOptions } from "../iconPicker/iconOptions";
+import { iconOptions, migrateIcon } from "../iconPicker/iconOptions";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { computeCurrentStreak, computeBestStreak, daysBetween, todayKey } from "../../utils/date";
 import { computePace } from "../../utils/pace";
@@ -10,19 +11,29 @@ import { computePace } from "../../utils/pace";
 const TOTAL_DAYS = 90
 
 const initialData: ScorecardData[] = [
-  { id: "1", area: "Leetcode", icon: "💻", current: 9, target: 150, history: [] },
-  { id: "2", area: "System Design", icon: "🧩", current: 0, target: 90, history: [] },
-  { id: "3", area: "Low Level Design", icon: "🎨", current: 0, target: 60, history: [] },
-  { id: "4", area: "Cyclo Veda", icon: "📚", current: 0, target: 120, history: [] },
-  { id: "5", area: "Fitness", icon: "🏋️", current: 0, target: 90, history: [] },
-  { id: "6", area: "Job Applications", icon: "💼", current: 0, target: 50, history: [] },
+  { id: "1", area: "Leetcode", icon: "Laptop", current: 9, target: 150, history: [] },
+  { id: "2", area: "System Design", icon: "Puzzle", current: 0, target: 90, history: [] },
+  { id: "3", area: "Low Level Design", icon: "Palette", current: 0, target: 60, history: [] },
+  { id: "4", area: "Cyclo Veda", icon: "BookOpen", current: 0, target: 120, history: [] },
+  { id: "5", area: "Fitness", icon: "Dumbbell", current: 0, target: 90, history: [] },
+  { id: "6", area: "Job Applications", icon: "Briefcase", current: 0, target: 50, history: [] },
 ]
 
 const Dashboard = () => {
   const [scorecards, setScorecards] = useLocalStorage<ScorecardData[]>("tracker.scorecards", initialData)
+  const migratedRef = useRef(false)
   const [newArea, setNewArea] = useState("")
   const [newTarget, setNewTarget] = useState("")
-  const [newIcon, setNewIcon] = useState(iconOptions[0])
+  const [newIcon, setNewIcon] = useState<string>(iconOptions[0])
+
+  useEffect(() => {
+    if (migratedRef.current) return
+    migratedRef.current = true
+    const migrated = scorecards.map(card => ({ ...card, icon: migrateIcon(card.icon) }))
+    if (migrated.some((card, i) => card.icon !== scorecards[i].icon)) {
+      setScorecards(migrated)
+    }
+  }, [scorecards, setScorecards])
   const [challengeStartKey, setChallengeStartKey] = useLocalStorage<string>("tracker.challengeStart", () => todayKey())
   const [addExpanded, setAddExpanded] = useState(false)
 
@@ -136,7 +147,7 @@ const Dashboard = () => {
           onClick={() => setAddExpanded(false)}
           aria-label="Cancel"
         >
-          ×
+          <X size={20} />
         </button>
       </div>
       <form className="add-scorecard-form" onSubmit={handleAdd}>
@@ -167,7 +178,7 @@ const Dashboard = () => {
       onClick={() => setAddExpanded(true)}
       aria-label="Add a new area"
     >
-      <span className="add-scorecard-button-icon">+</span>
+      <span className="add-scorecard-button-icon"><Plus size={32} /></span>
       <span className="add-scorecard-button-label">Add area</span>
     </button>
   )
@@ -199,7 +210,7 @@ const Dashboard = () => {
           </div>
           <div className="summary-card">
             <span className="summary-label">Logging streak</span>
-            <span className="summary-value">🔥 {summary.currentStreak}d</span>
+            <span className="summary-value"><Flame size={24} /> {summary.currentStreak}d</span>
             <p className="summary-hint">best: {summary.bestStreak} days</p>
           </div>
         </section>
@@ -231,7 +242,7 @@ const Dashboard = () => {
             <div className="scorecard-grid">{addAreaCard}</div>
           ) : (
             <div className="empty-state">
-              <div className="empty-state-icon">🎯</div>
+              <div className="empty-state-icon"><Target size={40} /></div>
               <p>No areas yet.</p>
               <button
                 type="button"
@@ -239,7 +250,7 @@ const Dashboard = () => {
                 onClick={() => setAddExpanded(true)}
                 aria-label="Add a new area"
               >
-                <span className="add-scorecard-button-icon">+</span>
+                <span className="add-scorecard-button-icon"><Plus size={32} /></span>
               </button>
             </div>
           )}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { iconOptions } from "./iconOptions"
+import { ChevronUp, ChevronDown } from "lucide-react";
+import { iconOptions, getAreaIcon } from "./iconOptions"
 
 
 interface IconPickerProps {
@@ -10,6 +11,8 @@ interface IconPickerProps {
 const IconPicker = ({ selectedIcon, onSelect }: IconPickerProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const SelectedIcon = getAreaIcon(selectedIcon)
+  const ArrowIcon = isOpen ? ChevronUp : ChevronDown
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,23 +38,26 @@ const IconPicker = ({ selectedIcon, onSelect }: IconPickerProps) => {
         onClick={() => setIsOpen(prev => !prev)}
         aria-label="Select icon"
       >
-        <span>{selectedIcon}</span>
-        <span className="icon-picker-arrow">{isOpen ? "▲" : "▼"}</span>
+        <SelectedIcon size={20} />
+        <ArrowIcon size={12} className="icon-picker-arrow" />
       </button>
 
       {isOpen && (
         <div className="icon-picker-dropdown">
-          {iconOptions.map(icon => (
-            <button
-              key={icon}
-              type="button"
-              className={`icon-picker-option ${selectedIcon === icon ? "selected" : ""}`}
-              onClick={() => handleSelect(icon)}
-              aria-label={`Select icon ${icon}`}
-            >
-              {icon}
-            </button>
-          ))}
+          {iconOptions.map(icon => {
+            const OptionIcon = getAreaIcon(icon)
+            return (
+              <button
+                key={icon}
+                type="button"
+                className={`icon-picker-option ${selectedIcon === icon ? "selected" : ""}`}
+                onClick={() => handleSelect(icon)}
+                aria-label={`Select icon ${icon}`}
+              >
+                <OptionIcon size={18} />
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

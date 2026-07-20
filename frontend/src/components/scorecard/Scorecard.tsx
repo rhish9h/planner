@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Pencil, Check, Flame, Trash2, Plus, Minus } from "lucide-react";
 import IconPicker from "../iconPicker/IconPicker";
+import { getAreaIcon } from "../iconPicker/iconOptions";
 import { computePace } from "../../utils/pace";
 import { computeCurrentStreak, computeBestStreak, todayKey } from "../../utils/date";
 
@@ -34,6 +36,7 @@ const getProgressClass = (percentage: number) => {
 
 const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
+  const AreaIcon = getAreaIcon(data.icon)
   const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
   const progressClass = getProgressClass(percentage)
   const isCompleted = percentage === 100
@@ -65,14 +68,14 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
     <div className="scorecard">
       <div className="scorecard-header">
         <div className="scorecard-title">
-          <span className="scorecard-icon">{data.icon}</span>
+          <span className="scorecard-icon"><AreaIcon size={20} /></span>
           <div className="scorecard-title-text">
             <h3>{data.area}</h3>
             <div className="scorecard-badges">
-              {isCompleted && <span className="completed-badge">✓ Done</span>}
+              {isCompleted && <span className="completed-badge"><Check size={12} /> Done</span>}
               {!isCompleted && currentStreak > 0 && (
                 <span className="streak-badge" title={`Best streak: ${bestStreak} day${bestStreak === 1 ? "" : "s"}`}>
-                  🔥 {currentStreak}-day streak
+                  <Flame size={12} /> {currentStreak}-day streak
                 </span>
               )}
             </div>
@@ -85,10 +88,10 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
             aria-label={isEditing ? "Done editing" : "Edit scorecard"}
             aria-expanded={isEditing}
           >
-            {isEditing ? "Done" : "Edit"}
+            {isEditing ? <Check size={16} /> : <Pencil size={16} />}
           </button>
           <button className="delete-button" onClick={() => onDelete(data.id)} aria-label="Delete scorecard">
-            ×
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
@@ -140,7 +143,7 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
           disabled={data.current <= 0}
           aria-label="Decrease progress"
         >
-          −
+          <Minus size={16} />
         </button>
         <input
           type="number"
@@ -156,7 +159,7 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
           disabled={data.current >= data.target}
           aria-label="Increase progress"
         >
-          +
+          <Plus size={16} />
         </button>
         {!isCompleted ? (
           <button
@@ -167,7 +170,7 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
             {loggedToday ? "Logged" : "Log today"}
           </button>
         ) : (
-          <span className="completed-badge">✓ Done</span>
+          <span className="completed-badge"><Check size={12} /> Done</span>
         )}
       </div>
     </div>
