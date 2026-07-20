@@ -321,7 +321,7 @@ body {
 }
 
 .dashboard-header {
-  margin-bottom: 0;
+  margin-bottom: 8px;
 }
 
 .dashboard-header h1 {
