@@ -7,6 +7,7 @@ import LogActivityModal from "../activity/LogActivityModal";
 import ActivityHistoryModal from "../activity/ActivityHistoryModal";
 import DayActivitiesModal from "../activity/DayActivitiesModal";
 import EditActivityModal from "../activity/EditActivityModal";
+import ConfirmDeleteModal from "../activity/ConfirmDeleteModal";
 import { iconOptions, migrateIcon } from "../iconPicker/iconOptions";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { computeCurrentStreak, computeBestStreak, daysBetween, todayKey } from "../../utils/date";
@@ -40,6 +41,10 @@ interface EditingActivityContext {
   areaId: string
   activity: Activity
 }
+
+type DeleteRequest =
+  | { kind: "area", areaId: string, areaName: string }
+  | { kind: "activity", areaId: string, activityId: string }
 
 const normalizeScorecards = (cards: Array<ScorecardData | LegacyScorecard>): ScorecardData[] => cards.map((card, index) => {
   const legacyCard = card as LegacyScorecard
@@ -78,6 +83,7 @@ const Dashboard = () => {
   const [loggingContext, setLoggingContext] = useState<LoggingContext | null>(null)
   const [historyAreaId, setHistoryAreaId] = useState<string | null>(null)
   const [editingActivity, setEditingActivity] = useState<EditingActivityContext | null>(null)
+  const [deleteRequest, setDeleteRequest] = useState<DeleteRequest | null>(null)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
 
   useEffect(() => {
@@ -131,7 +137,8 @@ const Dashboard = () => {
   }, [scorecards, daysElapsed])
 
   const handleDelete = (id: string) => {
-    setScorecards(prev => prev.filter(card => card.id !== id))
+    const area = scorecards.find(card => card.id === id)
+    if (area) setDeleteRequest({ kind: "area", areaId: id, areaName: area.area })
   }
 
   const handleIconChange = (id: string, icon: string) => {
@@ -171,10 +178,20 @@ const Dashboard = () => {
 
   const handleDeleteActivity = (id: string) => {
     if (!historyAreaId) return
-    setScorecards(prev => prev.map(card => {
-      if (card.id !== historyAreaId) return card
-      return { ...card, activities: card.activities.filter(activity => activity.id !== id) }
-    }))
+    setDeleteRequest({ kind: "activity", areaId: historyAreaId, activityId: id })
+  }
+
+  const confirmDelete = () => {
+    if (!deleteRequest) return
+    if (deleteRequest.kind === "area") {
+      setScorecards(prev => prev.filter(card => card.id !== deleteRequest.areaId))
+    } else {
+      setScorecards(prev => prev.map(card => card.id === deleteRequest.areaId
+        ? { ...card, activities: card.activities.filter(activity => activity.id !== deleteRequest.activityId) }
+        : card
+      ))
+    }
+    setDeleteRequest(null)
   }
 
   const handleEditActivity = (activity: Activity, dateKey: string, description: string, url: string) => {
@@ -356,6 +373,8 @@ const Dashboard = () => {
         areas={scorecards.map(card => ({ id: card.id, name: card.area }))}
         initialAreaId={loggingContext.areaId}
         initialDate={loggingContext.dateKey}
+        minDate={challengeStartKey}
+        maxDate={todayKey()}
         onClose={() => setLoggingContext(null)}
         onSubmit={handleLogActivity}
       />}
@@ -368,8 +387,14 @@ const Dashboard = () => {
       })()}
       {editingActivity && (() => {
         const area = scorecards.find(card => card.id === editingActivity.areaId)
-        return area ? <EditActivityModal areaName={area.area} activity={editingActivity.activity} onClose={() => setEditingActivity(null)} onSubmit={handleEditActivity} /> : null
+        return area ? <EditActivityModal areaName={area.area} activity={editingActivity.activity} minDate={challengeStartKey} maxDate={todayKey()} onClose={() => setEditingActivity(null)} onSubmit={handleEditActivity} /> : null
       })()}
+      {deleteRequest && <ConfirmDeleteModal
+        title={deleteRequest.kind === "area" ? `Delete ${deleteRequest.areaName}?` : "Delete this activity?"}
+        message={deleteRequest.kind === "area" ? "This will permanently remove the area and all of its activity history." : "This will permanently remove this activity from the area history and calendar."}
+        onCancel={() => setDeleteRequest(null)}
+        onConfirm={confirmDelete}
+      />}
       {selectedCalendarDate && <DayActivitiesModal dateKey={selectedCalendarDate} scorecards={scorecards} onClose={() => setSelectedCalendarDate(null)} onLogActivity={dateKey => {
         setSelectedCalendarDate(null)
         setLoggingContext({ dateKey })

@@ -1,6 +1,7 @@
 import { ExternalLink, Plus, X } from "lucide-react"
 import type { ScorecardData } from "../scorecard/Scorecard"
 import { formatDateLocal } from "../../utils/date"
+import { todayKey } from "../../utils/date"
 
 interface DayActivitiesModalProps {
   dateKey: string
@@ -15,6 +16,7 @@ const DayActivitiesModal = ({ dateKey, scorecards, onClose, onLogActivity }: Day
     activities: card.activities.filter(activity => formatDateLocal(new Date(activity.loggedAt)) === dateKey).sort((a, b) => b.loggedAt.localeCompare(a.loggedAt)),
   })).filter(group => group.activities.length)
   const label = new Date(`${dateKey}T12:00:00`).toLocaleDateString(undefined, { dateStyle: "full" })
+  const canLog = dateKey <= todayKey()
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
@@ -26,7 +28,7 @@ const DayActivitiesModal = ({ dateKey, scorecards, onClose, onLogActivity }: Day
           </div>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close"><X size={20} /></button>
         </div>
-        <button type="button" className="day-log-button primary-button" onClick={() => onLogActivity(dateKey)}><Plus size={16} /> Log activity</button>
+        {canLog ? <button type="button" className="day-log-button primary-button" onClick={() => onLogActivity(dateKey)}><Plus size={16} /> Log activity</button> : <p className="future-day-note">Activities can be logged on or before today.</p>}
         <div className="day-activity-groups">
           {groups.length ? groups.map(({ card, activities }) => (
             <section key={card.id} className="day-activity-group">

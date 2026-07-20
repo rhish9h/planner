@@ -6,11 +6,13 @@ import { formatDateLocal } from "../../utils/date"
 interface EditActivityModalProps {
   areaName: string
   activity: Activity
+  minDate: string
+  maxDate: string
   onClose: () => void
   onSubmit: (activity: Activity, date: string, description: string, url: string) => void
 }
 
-const EditActivityModal = ({ areaName, activity, onClose, onSubmit }: EditActivityModalProps) => {
+const EditActivityModal = ({ areaName, activity, minDate, maxDate, onClose, onSubmit }: EditActivityModalProps) => {
   const [loggedDate, setLoggedDate] = useState(formatDateLocal(new Date(activity.loggedAt)))
   const [description, setDescription] = useState(activity.description ?? "")
   const [url, setUrl] = useState(activity.url ?? "")
@@ -31,7 +33,7 @@ const EditActivityModal = ({ areaName, activity, onClose, onSubmit }: EditActivi
         }}>
           <label>
             Date
-            <input type="date" value={loggedDate} onChange={event => setLoggedDate(event.target.value)} required />
+            <input type="date" value={loggedDate} min={minDate} max={maxDate} onChange={event => setLoggedDate(event.target.value)} required />
           </label>
           <label>
             Description <span>optional</span>

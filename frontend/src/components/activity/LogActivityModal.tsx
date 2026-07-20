@@ -10,11 +10,13 @@ interface LogActivityModalProps {
   areas: AreaOption[]
   initialAreaId?: string
   initialDate: string
+  minDate: string
+  maxDate: string
   onClose: () => void
   onSubmit: (areaId: string, description: string, url: string, date: string) => void
 }
 
-const LogActivityModal = ({ areas, initialAreaId, initialDate, onClose, onSubmit }: LogActivityModalProps) => {
+const LogActivityModal = ({ areas, initialAreaId, initialDate, minDate, maxDate, onClose, onSubmit }: LogActivityModalProps) => {
   const [areaId, setAreaId] = useState(initialAreaId ?? areas[0]?.id ?? "")
   const [loggedDate, setLoggedDate] = useState(initialDate)
   const [description, setDescription] = useState("")
@@ -43,7 +45,7 @@ const LogActivityModal = ({ areas, initialAreaId, initialDate, onClose, onSubmit
           </label>}
           <label>
             Date
-            <input type="date" value={loggedDate} onChange={event => setLoggedDate(event.target.value)} required />
+            <input type="date" value={loggedDate} min={minDate} max={maxDate} onChange={event => setLoggedDate(event.target.value)} required />
           </label>
           <label>
             Description <span>optional</span>

@@ -1354,6 +1354,49 @@ input[type="color"]:focus {
   margin: -0.25rem 0 1rem;
 }
 
+.future-day-note {
+  margin: -0.25rem 0 1rem;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.confirm-delete-modal {
+  width: min(440px, calc(100vw - 2rem));
+}
+
+.confirm-delete-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.confirm-delete-title > span {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.confirm-delete-message {
+  margin: 0;
+  color: #475569;
+  line-height: 1.55;
+}
+
+.danger-button {
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #fff;
+  padding: 0.65rem 0.9rem;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
 .day-activity-group h3 {
   display: flex;
   align-items: center;
