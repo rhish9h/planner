@@ -307,3 +307,743 @@ body {
   background: #e0e7ff;
   border-color: #4f46e5;
 }
+
+/* === Dashboard UI refresh === */
+
+:root {
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --low: #f87171;
+  --medium: #fbbf24;
+  --high: #34d399;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  padding: 32px 24px;
+  line-height: 1.5;
+}
+
+.dashboard-header {
+  margin-bottom: 28px;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.dashboard-subtitle {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.summary-progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.summary-progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.add-scorecard-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.add-scorecard-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+
+.add-scorecard-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.add-scorecard-form input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 180px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.add-scorecard-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.add-scorecard-form button {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.add-scorecard-form button:hover {
+  background: var(--primary-dark);
+}
+
+.scorecard-section {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.scorecard-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.scorecard-section .empty-state {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 32px 20px;
+}
+
+.scorecard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.scorecard {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.scorecard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.scorecard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.scorecard-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scorecard-title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scorecard-title h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.scorecard-icon {
+  font-size: 26px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.completed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+  background: #ecfdf5;
+  border-radius: 999px;
+  padding: 2px 8px;
+  width: fit-content;
+}
+
+.scorecard-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 6px 10px;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.edit-button:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: #eef2ff;
+}
+
+.delete-button {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--danger);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.delete-button:hover {
+  background: #fef2f2;
+}
+
+.scorecard-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.progress-text {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.progress-divider {
+  color: var(--muted);
+}
+
+.percentage {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.percentage.low {
+  color: var(--danger);
+}
+
+.percentage.medium {
+  color: var(--warning);
+}
+
+.percentage.high {
+  color: var(--high);
+}
+
+.percentage.complete {
+  color: var(--success);
+}
+
+.progress-bar {
+  height: 10px;
+  background: var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 5px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.progress-fill.low {
+  background: var(--low);
+}
+
+.progress-fill.medium {
+  background: var(--medium);
+}
+
+.progress-fill.high {
+  background: linear-gradient(90deg, var(--primary), var(--high));
+}
+
+.progress-fill.complete {
+  background: var(--success);
+}
+
+.scorecard-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.scorecard-controls button.control-button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.scorecard-controls button.control-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.scorecard-controls button.control-button:not(:disabled):hover {
+  background: var(--bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.scorecard-controls input {
+  width: 72px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.status-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.status-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.status-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.status-input.status-danger {
+  border-left-color: var(--danger);
+}
+
+.status-input.status-warning {
+  border-left-color: var(--warning);
+}
+
+.status-input.status-good {
+  border-left-color: var(--high);
+}
+
+.status-input.status-complete {
+  border-left-color: var(--success);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.scorecard-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.edit-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.edit-field input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--card);
+}
+
+.edit-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.icon-picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.icon-picker-trigger:hover {
+  border-color: var(--primary);
+  background: #f8fafc;
+}
+
+.icon-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  min-width: 180px;
+}
+
+@media (max-width: 640px) {
+  .dashboard-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .add-scorecard-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-scorecard-form input,
+  .add-scorecard-form button {
+    width: 100%;
+  }
+}
+
+/* === Challenge Calendar === */
+
+.challenge-calendar {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.calendar-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.calendar-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.calendar-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.legend-swatch.outside {
+  background: transparent;
+}
+
+.legend-swatch.empty {
+  background: var(--card);
+}
+
+.legend-swatch.level-1 {
+  background: #bbf7d0;
+}
+
+.legend-swatch.level-2 {
+  background: #4ade80;
+}
+
+.legend-swatch.level-3 {
+  background: #16a34a;
+}
+
+.legend-swatch.today {
+  background: var(--primary);
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(28px, 1fr));
+  gap: 4px;
+}
+
+.calendar-cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  min-height: 28px;
+}
+
+.calendar-cell.outside {
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.calendar-cell.future {
+  background: var(--bg);
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.calendar-cell.empty {
+  background: var(--card);
+  color: var(--muted);
+}
+
+.calendar-cell.level-1 {
+  background: #bbf7d0;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.calendar-cell.level-2 {
+  background: #4ade80;
+  border-color: #22c55e;
+  color: #14532d;
+}
+
+.calendar-cell.level-3 {
+  background: #16a34a;
+  border-color: #15803d;
+  color: white;
+}
+
+.calendar-cell.today {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.calendar-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.calendar-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+.calendar-start-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.calendar-start-label input {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--card);
+}
+
+@media (max-width: 640px) {
+  .calendar-header {
+    flex-direction: column;
+  }
+
+  .calendar-legend {
+    gap: 8px;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(24px, 1fr));
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { iconOptions } from "./iconOptions"
 
-export const iconOptions = ["💻", "🧩", "🎨", "📚", "🏋️", "💼", "🚀", "🔥", "⭐", "🎯", "📈", "🧠"]
 
 interface IconPickerProps {
   selectedIcon: string

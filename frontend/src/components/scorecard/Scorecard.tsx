@@ -8,6 +8,7 @@ export interface ScorecardData {
   current: number
   target: number
   status: string
+  history: string[]
 }
 
 interface ScorecardProps {
@@ -18,19 +19,46 @@ interface ScorecardProps {
   onAreaChange: (id: string, area: string) => void
   onTargetChange: (id: string, target: number) => void
   onDelete: (id: string) => void
+  onLogDate: (id: string) => void
+  onRemoveDate: (id: string) => void
 }
 
-const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange, onTargetChange, onDelete }: ScorecardProps) => {
+const statusSuggestions = ["on pace", "slightly behind pace", "needs logging/start", "ahead of pace", "completed"]
+
+const getProgressClass = (percentage: number) => {
+  if (percentage >= 100) return "complete"
+  if (percentage >= 75) return "high"
+  if (percentage >= 40) return "medium"
+  return "low"
+}
+
+const getStatusClass = (status: string) => {
+  const s = status.toLowerCase()
+  if (s.includes("complete")) return "status-complete"
+  if (s.includes("ahead") || s.includes("on pace")) return "status-good"
+  if (s.includes("behind")) return "status-warning"
+  if (s.includes("need")) return "status-danger"
+  return ""
+}
+
+const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
+  const progressClass = getProgressClass(percentage)
+  const statusClass = getStatusClass(data.status)
+  const isCompleted = percentage === 100
 
   const handleIncrement = () => {
     onUpdate(data.id, data.current + 1)
+    onLogDate(data.id)
   }
 
   const handleDecrement = () => {
     if (data.current > 0) {
       onUpdate(data.id, data.current - 1)
+      if (data.history.length > 0) {
+        onRemoveDate(data.id)
+      }
     }
   }
 
@@ -44,15 +72,19 @@ const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange,
       <div className="scorecard-header">
         <div className="scorecard-title">
           <span className="scorecard-icon">{data.icon}</span>
-          <h3>{data.area}</h3>
+          <div className="scorecard-title-text">
+            <h3>{data.area}</h3>
+            {isCompleted && <span className="completed-badge">✓ Done</span>}
+          </div>
         </div>
         <div className="scorecard-actions">
           <button 
             className="edit-button" 
             onClick={() => setIsEditing(prev => !prev)}
             aria-label={isEditing ? "Done editing" : "Edit scorecard"}
+            aria-expanded={isEditing}
           >
-            {isEditing ? "✓" : "✏️"}
+            {isEditing ? "Done" : "Edit"}
           </button>
           <button className="delete-button" onClick={() => onDelete(data.id)} aria-label="Delete scorecard">
             ×
@@ -90,33 +122,56 @@ const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange,
       )}
       
       <div className="scorecard-progress">
-        <span className="progress-text">{data.current} / {data.target}</span>
-        <span className="percentage">{percentage}%</span>
+        <span className="progress-text">{data.current} <span className="progress-divider">/</span> {data.target}</span>
+        <span className={`percentage ${progressClass}`}>{percentage}%</span>
       </div>
       
       <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${percentage}%` }} />
+        <div className={`progress-fill ${progressClass}`} style={{ width: `${percentage}%` }} />
       </div>
       
       <div className="scorecard-controls">
-        <button onClick={handleDecrement} disabled={data.current <= 0}>−</button>
+        <button
+          className="control-button"
+          onClick={handleDecrement}
+          disabled={data.current <= 0}
+          aria-label="Decrease progress"
+        >
+          −
+        </button>
         <input 
           type="number" 
           value={data.current} 
           onChange={handleProgressChange}
           min={0}
           max={data.target}
+          aria-label="Current progress"
         />
-        <button onClick={handleIncrement} disabled={data.current >= data.target}>+</button>
+        <button
+          className="control-button"
+          onClick={handleIncrement}
+          disabled={data.current >= data.target}
+          aria-label="Increase progress"
+        >
+          +
+        </button>
       </div>
       
+      <label className="status-label" htmlFor={`status-${data.id}`}>Status</label>
       <input 
+        id={`status-${data.id}`}
+        list={`status-suggestions-${data.id}`}
         type="text" 
-        className="status-input"
+        className={`status-input ${statusClass}`}
         value={data.status} 
         onChange={(e) => onStatusChange(data.id, e.target.value)}
-        placeholder="Status"
+        placeholder="Update status"
       />
+      <datalist id={`status-suggestions-${data.id}`}>
+        {statusSuggestions.map(s => (
+          <option key={s} value={s} />
+        ))}
+      </datalist>
       
     </div>
   )
