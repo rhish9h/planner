@@ -1,19 +1,11 @@
 import { useMemo } from "react";
 import type { ScorecardData } from "../scorecard/Scorecard";
+import { MS_PER_DAY, formatDateLocal as formatDate } from "../../utils/date";
 
 interface ChallengeCalendarProps {
   startDate: Date
   totalDays?: number
   scorecards: ScorecardData[]
-}
-
-const MS_PER_DAY = 86_400_000
-
-const formatDate = (d: Date) => {
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
 }
 
 const ChallengeCalendar = ({ startDate, totalDays = 90, scorecards }: ChallengeCalendarProps) => {

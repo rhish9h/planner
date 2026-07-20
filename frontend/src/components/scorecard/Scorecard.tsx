@@ -1,5 +1,7 @@
 import { useState } from "react";
 import IconPicker from "../iconPicker/IconPicker";
+import { computePace } from "../../utils/pace";
+import { computeCurrentStreak, computeBestStreak, todayKey } from "../../utils/date";
 
 export interface ScorecardData {
   id: string
@@ -7,14 +9,14 @@ export interface ScorecardData {
   icon: string
   current: number
   target: number
-  status: string
   history: string[]
 }
 
 interface ScorecardProps {
   data: ScorecardData
+  daysElapsed: number
+  totalDays: number
   onUpdate: (id: string, current: number) => void
-  onStatusChange: (id: string, status: string) => void
   onIconChange: (id: string, icon: string) => void
   onAreaChange: (id: string, area: string) => void
   onTargetChange: (id: string, target: number) => void
@@ -23,8 +25,6 @@ interface ScorecardProps {
   onRemoveDate: (id: string) => void
 }
 
-const statusSuggestions = ["on pace", "slightly behind pace", "needs logging/start", "ahead of pace", "completed"]
-
 const getProgressClass = (percentage: number) => {
   if (percentage >= 100) return "complete"
   if (percentage >= 75) return "high"
@@ -32,21 +32,15 @@ const getProgressClass = (percentage: number) => {
   return "low"
 }
 
-const getStatusClass = (status: string) => {
-  const s = status.toLowerCase()
-  if (s.includes("complete")) return "status-complete"
-  if (s.includes("ahead") || s.includes("on pace")) return "status-good"
-  if (s.includes("behind")) return "status-warning"
-  if (s.includes("need")) return "status-danger"
-  return ""
-}
-
-const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
+const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
   const progressClass = getProgressClass(percentage)
-  const statusClass = getStatusClass(data.status)
   const isCompleted = percentage === 100
+  const pace = computePace(data.current, data.target, daysElapsed, totalDays)
+  const currentStreak = computeCurrentStreak(data.history)
+  const bestStreak = computeBestStreak(data.history)
+  const loggedToday = data.history.includes(todayKey())
 
   const handleIncrement = () => {
     onUpdate(data.id, data.current + 1)
@@ -74,7 +68,14 @@ const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange,
           <span className="scorecard-icon">{data.icon}</span>
           <div className="scorecard-title-text">
             <h3>{data.area}</h3>
-            {isCompleted && <span className="completed-badge">✓ Done</span>}
+            <div className="scorecard-badges">
+              {isCompleted && <span className="completed-badge">✓ Done</span>}
+              {!isCompleted && currentStreak > 0 && (
+                <span className="streak-badge" title={`Best streak: ${bestStreak} day${bestStreak === 1 ? "" : "s"}`}>
+                  🔥 {currentStreak}-day streak
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="scorecard-actions">
@@ -91,7 +92,7 @@ const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange,
           </button>
         </div>
       </div>
-      
+
       {isEditing && (
         <div className="scorecard-edit-form">
           <div className="edit-field">
@@ -125,11 +126,23 @@ const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange,
         <span className="progress-text">{data.current} <span className="progress-divider">/</span> {data.target}</span>
         <span className={`percentage ${progressClass}`}>{percentage}%</span>
       </div>
-      
+
       <div className="progress-bar">
         <div className={`progress-fill ${progressClass}`} style={{ width: `${percentage}%` }} />
       </div>
-      
+
+      <span className={`pace-badge pace-${pace.className}`}>{pace.label}</span>
+
+      {!isCompleted && (
+        <button
+          className={`log-today-button ${loggedToday ? "logged" : ""}`}
+          onClick={handleIncrement}
+          aria-label="Log today's progress"
+        >
+          {loggedToday ? "✓ Logged today — add more" : "Log today"}
+        </button>
+      )}
+
       <div className="scorecard-controls">
         <button
           className="control-button"
@@ -155,24 +168,8 @@ const Scorecard = ({ data, onUpdate, onStatusChange, onIconChange, onAreaChange,
         >
           +
         </button>
+        {bestStreak > 0 && <span className="best-streak-note">Best streak: {bestStreak}d</span>}
       </div>
-      
-      <label className="status-label" htmlFor={`status-${data.id}`}>Status</label>
-      <input 
-        id={`status-${data.id}`}
-        list={`status-suggestions-${data.id}`}
-        type="text" 
-        className={`status-input ${statusClass}`}
-        value={data.status} 
-        onChange={(e) => onStatusChange(data.id, e.target.value)}
-        placeholder="Update status"
-      />
-      <datalist id={`status-suggestions-${data.id}`}>
-        {statusSuggestions.map(s => (
-          <option key={s} value={s} />
-        ))}
-      </datalist>
-      
     </div>
   )
 }
