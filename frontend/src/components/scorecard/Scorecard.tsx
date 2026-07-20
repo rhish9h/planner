@@ -176,7 +176,8 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onCol
           <button
             className={`log-today-button ${loggedToday ? "logged" : ""}`}
             onClick={handleIncrement}
-            aria-label="Log today's progress"
+            disabled={loggedToday}
+            aria-label={loggedToday ? "Already logged today" : "Log today's progress"}
           >
             {loggedToday ? "Logged" : "Log today"}
           </button>

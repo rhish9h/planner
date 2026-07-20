@@ -129,7 +129,7 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
         <div>
           <h3>90-Day Challenge</h3>
           <p className="calendar-subtitle">
-            {activeDays} active days · longest streak {longestStreak}
+            {activeDays} active {activeDays === 1 ? "day" : "days"} · longest streak {longestStreak} {longestStreak === 1 ? "day" : "days"}
           </p>
         </div>
         <div className="calendar-header-right">

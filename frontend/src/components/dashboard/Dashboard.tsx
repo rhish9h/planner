@@ -233,7 +233,7 @@ const Dashboard = () => {
               <div className="summary-card">
                 <span className="summary-label">Logging streak</span>
                 <span className="summary-value"><Flame size={24} /> {summary.currentStreak}d</span>
-                <p className="summary-hint">best: {summary.bestStreak} days</p>
+                <p className="summary-hint">best: {summary.bestStreak} day{summary.bestStreak === 1 ? "" : "s"}</p>
               </div>
             </section>
           )}
@@ -271,6 +271,7 @@ const Dashboard = () => {
                 aria-label="Add a new area"
               >
                 <span className="add-scorecard-button-icon"><Plus size={32} /></span>
+                <span className="add-scorecard-button-label">Add area</span>
               </button>
             </div>
           )}
