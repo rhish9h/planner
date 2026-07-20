@@ -39,6 +39,19 @@ const Dashboard = () => {
     ))
   }
 
+  const handleAreaChange = (id: string, area: string) => {
+    setScorecards(prev => prev.map(card => 
+      card.id === id ? { ...card, area } : card
+    ))
+  }
+
+  const handleTargetChange = (id: string, target: number) => {
+    if (target <= 0) return
+    setScorecards(prev => prev.map(card => 
+      card.id === id ? { ...card, target, current: Math.min(card.current, target) } : card
+    ))
+  }
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
     const target = parseInt(newTarget, 10)
@@ -91,6 +104,8 @@ const Dashboard = () => {
             onUpdate={handleUpdate}
             onStatusChange={handleStatusChange}
             onIconChange={handleIconChange}
+            onAreaChange={handleAreaChange}
+            onTargetChange={handleTargetChange}
             onDelete={handleDelete}
           />
         ))}

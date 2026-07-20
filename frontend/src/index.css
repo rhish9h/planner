@@ -191,20 +191,53 @@ body {
   line-height: 1;
 }
 
-.scorecard-edit-section {
+.scorecard-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.edit-button:hover {
+  opacity: 1;
+}
+
+.scorecard-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 16px;
-  padding: 8px 12px;
+  padding: 16px;
   background: #f9f9f9;
   border-radius: 8px;
 }
 
-.edit-label {
-  font-size: 13px;
-  color: #666;
-  font-weight: 500;
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-field input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.edit-field input:focus {
+  outline: none;
+  border-color: #4f46e5;
 }
 
 .icon-picker {
@@ -273,21 +306,4 @@ body {
 .icon-picker-option.selected {
   background: #e0e7ff;
   border-color: #4f46e5;
-}
-
-.edit-toggle-button {
-  width: 100%;
-  padding: 8px;
-  margin-top: 12px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #666;
-}
-
-.edit-toggle-button:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
 }
