@@ -9,6 +9,7 @@ export interface ScorecardData {
   id: string
   area: string
   icon: string
+  color?: string
   current: number
   target: number
   history: string[]
@@ -20,6 +21,7 @@ interface ScorecardProps {
   totalDays: number
   onUpdate: (id: string, current: number) => void
   onIconChange: (id: string, icon: string) => void
+  onColorChange: (id: string, color: string) => void
   onAreaChange: (id: string, area: string) => void
   onTargetChange: (id: string, target: number) => void
   onDelete: (id: string) => void
@@ -34,7 +36,7 @@ const getProgressClass = (percentage: number) => {
   return "low"
 }
 
-const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
+const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onColorChange, onAreaChange, onTargetChange, onDelete, onLogDate, onRemoveDate }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const AreaIcon = getAreaIcon(data.icon)
   const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
@@ -68,7 +70,7 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
     <div className="scorecard">
       <div className="scorecard-header">
         <div className="scorecard-title">
-          <span className="scorecard-icon"><AreaIcon size={20} /></span>
+          <span className="scorecard-icon" style={{ color: data.color }}><AreaIcon size={20} /></span>
           <div className="scorecard-title-text">
             <h3>{data.area}</h3>
             <div className="scorecard-badges">
@@ -120,6 +122,15 @@ const Scorecard = ({ data, daysElapsed, totalDays, onUpdate, onIconChange, onAre
             <IconPicker
               selectedIcon={data.icon}
               onSelect={(icon) => onIconChange(data.id, icon)}
+            />
+          </div>
+          <div className="edit-field">
+            <label className="edit-label">Color</label>
+            <input
+              type="color"
+              value={data.color || "#4f46e5"}
+              onChange={(e) => onColorChange(data.id, e.target.value)}
+              aria-label="Scorecard color"
             />
           </div>
         </div>

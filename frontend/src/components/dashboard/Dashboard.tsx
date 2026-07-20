@@ -7,16 +7,17 @@ import { iconOptions, migrateIcon } from "../iconPicker/iconOptions";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { computeCurrentStreak, computeBestStreak, daysBetween, todayKey } from "../../utils/date";
 import { computePace } from "../../utils/pace";
+import { getDefaultScorecardColor } from "../../utils/colors";
 
 const TOTAL_DAYS = 90
 
 const initialData: ScorecardData[] = [
-  { id: "1", area: "Leetcode", icon: "Laptop", current: 9, target: 150, history: [] },
-  { id: "2", area: "System Design", icon: "Puzzle", current: 0, target: 90, history: [] },
-  { id: "3", area: "Low Level Design", icon: "Palette", current: 0, target: 60, history: [] },
-  { id: "4", area: "Cyclo Veda", icon: "BookOpen", current: 0, target: 120, history: [] },
-  { id: "5", area: "Fitness", icon: "Dumbbell", current: 0, target: 90, history: [] },
-  { id: "6", area: "Job Applications", icon: "Briefcase", current: 0, target: 50, history: [] },
+  { id: "1", area: "Leetcode", icon: "Laptop", color: getDefaultScorecardColor(0), current: 9, target: 150, history: [] },
+  { id: "2", area: "System Design", icon: "Puzzle", color: getDefaultScorecardColor(1), current: 0, target: 90, history: [] },
+  { id: "3", area: "Low Level Design", icon: "Palette", color: getDefaultScorecardColor(2), current: 0, target: 60, history: [] },
+  { id: "4", area: "Cyclo Veda", icon: "BookOpen", color: getDefaultScorecardColor(3), current: 0, target: 120, history: [] },
+  { id: "5", area: "Fitness", icon: "Dumbbell", color: getDefaultScorecardColor(4), current: 0, target: 90, history: [] },
+  { id: "6", area: "Job Applications", icon: "Briefcase", color: getDefaultScorecardColor(5), current: 0, target: 50, history: [] },
 ]
 
 const Dashboard = () => {
@@ -25,12 +26,17 @@ const Dashboard = () => {
   const [newArea, setNewArea] = useState("")
   const [newTarget, setNewTarget] = useState("")
   const [newIcon, setNewIcon] = useState<string>(iconOptions[0])
+  const [newColor, setNewColor] = useState<string>(() => getDefaultScorecardColor(scorecards.length))
 
   useEffect(() => {
     if (migratedRef.current) return
     migratedRef.current = true
-    const migrated = scorecards.map(card => ({ ...card, icon: migrateIcon(card.icon) }))
-    if (migrated.some((card, i) => card.icon !== scorecards[i].icon)) {
+    const migrated = scorecards.map((card, i) => ({
+      ...card,
+      icon: migrateIcon(card.icon),
+      color: card.color ?? getDefaultScorecardColor(i),
+    }))
+    if (migrated.some((card, i) => card.icon !== scorecards[i].icon || card.color !== scorecards[i].color)) {
       setScorecards(migrated)
     }
   }, [scorecards, setScorecards])
@@ -89,6 +95,12 @@ const Dashboard = () => {
     ))
   }
 
+  const handleColorChange = (id: string, color: string) => {
+    setScorecards(prev => prev.map(card => 
+      card.id === id ? { ...card, color } : card
+    ))
+  }
+
   const handleAreaChange = (id: string, area: string) => {
     setScorecards(prev => prev.map(card => 
       card.id === id ? { ...card, area } : card
@@ -125,6 +137,7 @@ const Dashboard = () => {
       id: crypto.randomUUID(),
       area: newArea.trim(),
       icon: newIcon,
+      color: newColor,
       current: 0,
       target,
       history: [],
@@ -134,6 +147,7 @@ const Dashboard = () => {
     setNewArea("")
     setNewTarget("")
     setNewIcon(iconOptions[0])
+    setNewColor(getDefaultScorecardColor(scorecards.length + 1))
     setAddExpanded(false)
   }
 
@@ -167,6 +181,12 @@ const Dashboard = () => {
           aria-label="Target value"
         />
         <IconPicker selectedIcon={newIcon} onSelect={setNewIcon} />
+        <input
+          type="color"
+          value={newColor}
+          onChange={(e) => setNewColor(e.target.value)}
+          aria-label="Scorecard color"
+        />
         <button type="submit">Add</button>
       </form>
     </div>
@@ -194,30 +214,29 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {scorecards.length > 0 && (
-        <section className="dashboard-summary">
-          <div className="summary-card">
-            <span className="summary-label">Overall progress</span>
-            <span className="summary-value">{summary.overallPct}%</span>
-            <div className="summary-progress-bar">
-              <div className="summary-progress-fill" style={{ width: `${summary.overallPct}%` }} />
-            </div>
-          </div>
-          <div className="summary-card">
-            <span className="summary-label">On pace</span>
-            <span className="summary-value">{summary.onPaceCount}<span className="summary-value-of"> / {summary.totalGoals}</span></span>
-            <p className="summary-hint">goals tracking to target</p>
-          </div>
-          <div className="summary-card">
-            <span className="summary-label">Logging streak</span>
-            <span className="summary-value"><Flame size={24} /> {summary.currentStreak}d</span>
-            <p className="summary-hint">best: {summary.bestStreak} days</p>
-          </div>
-        </section>
-      )}
-
       <div className="dashboard-content">
         <section className="scorecard-section">
+          {scorecards.length > 0 && (
+            <section className="dashboard-summary">
+              <div className="summary-card">
+                <span className="summary-label">Overall progress</span>
+                <span className="summary-value">{summary.overallPct}%</span>
+                <div className="summary-progress-bar">
+                  <div className="summary-progress-fill" style={{ width: `${summary.overallPct}%` }} />
+                </div>
+              </div>
+              <div className="summary-card">
+                <span className="summary-label">On pace</span>
+                <span className="summary-value">{summary.onPaceCount}<span className="summary-value-of"> / {summary.totalGoals}</span></span>
+                <p className="summary-hint">goals tracking to target</p>
+              </div>
+              <div className="summary-card">
+                <span className="summary-label">Logging streak</span>
+                <span className="summary-value"><Flame size={24} /> {summary.currentStreak}d</span>
+                <p className="summary-hint">best: {summary.bestStreak} days</p>
+              </div>
+            </section>
+          )}
           <h2 className="scorecard-section-title">Your areas</h2>
           {scorecards.length > 0 ? (
             <div className="scorecard-grid">
@@ -229,6 +248,7 @@ const Dashboard = () => {
                   totalDays={TOTAL_DAYS}
                   onUpdate={handleUpdate}
                   onIconChange={handleIconChange}
+                  onColorChange={handleColorChange}
                   onAreaChange={handleAreaChange}
                   onTargetChange={handleTargetChange}
                   onDelete={handleDelete}

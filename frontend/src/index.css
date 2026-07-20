@@ -12,7 +12,7 @@ body {
 }
 
 .dashboard {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -21,9 +21,13 @@ body {
 
 .dashboard-content {
   display: grid;
-  grid-template-columns: 2.5fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.25fr);
   gap: 16px;
   align-items: start;
+}
+
+.dashboard-content > section {
+  min-width: 0;
 }
 
 @media (max-width: 900px) {
@@ -333,7 +337,7 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  padding: 20px;
+  padding: 12px;
   line-height: 1.5;
 }
 
@@ -355,9 +359,9 @@ body {
 
 .dashboard-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
-  margin-bottom: 0;
+  margin-bottom: 16px;
 }
 
 .summary-value-of {
@@ -575,6 +579,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
@@ -582,12 +588,17 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .scorecard-title-text {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .scorecard-title h3 {
@@ -628,6 +639,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .edit-button {
@@ -739,7 +751,7 @@ body {
   align-items: center;
   gap: 10px;
   margin-bottom: 0;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .scorecard-controls button.control-button {
@@ -919,6 +931,22 @@ body {
 }
 
 .edit-field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input[type="color"] {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--card);
+}
+
+input[type="color"]:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
@@ -1159,18 +1187,19 @@ body {
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(28px, 1fr));
   gap: 3px;
 }
 
 .calendar-cell {
   position: relative;
-  height: 34px;
-  min-height: 34px;
+  height: 44px;
+  min-height: 44px;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 3px;
   font-size: 10px;
   font-weight: 600;
   color: var(--text);
@@ -1178,9 +1207,24 @@ body {
   border: 1px solid var(--border);
 }
 
+.calendar-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 3px;
+  background: var(--ring-gradient, transparent);
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  z-index: 0;
+}
+
 .cell-month {
   position: absolute;
-  top: 2px;
+  top: 5px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 8px;
@@ -1188,11 +1232,15 @@ body {
   line-height: 1;
   color: inherit;
   opacity: 0.9;
+  z-index: 1;
 }
 
 .cell-day {
+  position: relative;
+  z-index: 1;
   line-height: 1;
 }
+
 
 .calendar-cell.outside {
   background: transparent;

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Settings, X } from "lucide-react";
 import type { ScorecardData } from "../scorecard/Scorecard";
 import { MS_PER_DAY, formatDateLocal as formatDate } from "../../utils/date";
+import { getDefaultScorecardColor } from "../../utils/colors";
 
 interface ChallengeCalendarProps {
   startDate: Date
@@ -19,6 +20,28 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
       })
     })
     return counts
+  }, [scorecards])
+
+  const streamsByDate = useMemo(() => {
+    const colors: Record<string, string[]> = {}
+    const labels: Record<string, string[]> = {}
+    scorecards.forEach((card, index) => {
+      const color = card.color || getDefaultScorecardColor(index)
+      const seen = new Set<string>()
+      card.history.forEach(dateKey => {
+        if (seen.has(dateKey)) return
+        seen.add(dateKey)
+        if (!colors[dateKey]) {
+          colors[dateKey] = []
+          labels[dateKey] = []
+        }
+        if (!colors[dateKey].includes(color)) {
+          colors[dateKey].push(color)
+          labels[dateKey].push(card.area)
+        }
+      })
+    })
+    return { colors, labels }
   }, [scorecards])
 
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -166,11 +189,24 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
       <div className="calendar-grid">
         {cells.map((cell, idx) => {
           const isMonthStart = cell.isInRange && cell.date.getDate() === 1
+          const streamColors = streamsByDate.colors[cell.dateKey] || []
+          const streamLabels = streamsByDate.labels[cell.dateKey] || []
+          const title = cell.isInRange
+            ? `${cell.dateKey} · Day ${cell.dayNumber!}${streamLabels.length ? " · " + streamLabels.join(", ") : ""} · ${cell.count} logged`
+            : ""
+          const ringGradient = streamColors.length
+            ? `conic-gradient(${streamColors.map((color, i) => {
+              const start = i * (360 / streamColors.length)
+              const end = (i + 1) * (360 / streamColors.length)
+              return `${color} ${start}deg ${end}deg`
+            }).join(", ")})`
+            : undefined
           return (
             <div
               key={idx}
               className={`calendar-cell ${getHeatClass(cell.count, cell.isFuture, cell.isInRange)} ${cell.isToday && cell.isInRange ? "today" : ""}`}
-              title={cell.isInRange ? `${cell.dateKey} · Day ${cell.dayNumber!} · ${cell.count} logged` : ""}
+              title={title}
+              style={ringGradient ? ({ "--ring-gradient": ringGradient } as React.CSSProperties) : undefined}
             >
               {cell.isInRange && (
                 <>
