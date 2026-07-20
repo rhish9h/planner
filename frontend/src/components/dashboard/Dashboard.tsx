@@ -257,17 +257,12 @@ const Dashboard = () => {
         </section>
 
         <section className="calendar-section">
-          <div className="calendar-section-header">
-            <label className="calendar-start-label">
-              Start date
-              <input
-                type="date"
-                value={challengeStartKey}
-                onChange={(e) => setChallengeStartKey(e.target.value)}
-              />
-            </label>
-          </div>
-          <ChallengeCalendar startDate={challengeStart} totalDays={TOTAL_DAYS} scorecards={scorecards} />
+          <ChallengeCalendar
+            startDate={challengeStart}
+            onStartDateChange={setChallengeStartKey}
+            totalDays={TOTAL_DAYS}
+            scorecards={scorecards}
+          />
         </section>
       </div>
     </div>

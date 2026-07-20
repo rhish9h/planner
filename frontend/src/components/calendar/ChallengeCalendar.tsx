@@ -1,14 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Settings, X } from "lucide-react";
 import type { ScorecardData } from "../scorecard/Scorecard";
 import { MS_PER_DAY, formatDateLocal as formatDate } from "../../utils/date";
 
 interface ChallengeCalendarProps {
   startDate: Date
+  onStartDateChange: (key: string) => void
   totalDays?: number
   scorecards: ScorecardData[]
 }
 
-const ChallengeCalendar = ({ startDate, totalDays = 90, scorecards }: ChallengeCalendarProps) => {
+const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, scorecards }: ChallengeCalendarProps) => {
   const logCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     scorecards.forEach(card => {
@@ -18,6 +20,8 @@ const ChallengeCalendar = ({ startDate, totalDays = 90, scorecards }: ChallengeC
     })
     return counts
   }, [scorecards])
+
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const cells = useMemo(() => {
     const start = new Date(startDate)
@@ -105,13 +109,51 @@ const ChallengeCalendar = ({ startDate, totalDays = 90, scorecards }: ChallengeC
             {activeDays} active days · longest streak {longestStreak}
           </p>
         </div>
-        <div className="calendar-legend">
-          <span className="legend-item"><span className="legend-swatch outside" /> Rest</span>
-          <span className="legend-item"><span className="legend-swatch empty" /> Missed</span>
-          <span className="legend-item"><span className="legend-swatch level-1" /> 1</span>
-          <span className="legend-item"><span className="legend-swatch level-2" /> 2–3</span>
-          <span className="legend-item"><span className="legend-swatch level-3" /> 4+</span>
-          <span className="legend-item"><span className="legend-swatch today" /> Today</span>
+        <div className="calendar-header-right">
+          <div className="calendar-legend">
+            <span className="legend-item"><span className="legend-swatch outside" /> Rest</span>
+            <span className="legend-item"><span className="legend-swatch empty" /> Missed</span>
+            <span className="legend-item"><span className="legend-swatch level-1" /> 1</span>
+            <span className="legend-item"><span className="legend-swatch level-2" /> 2–3</span>
+            <span className="legend-item"><span className="legend-swatch level-3" /> 4+</span>
+            <span className="legend-item"><span className="legend-swatch today" /> Today</span>
+          </div>
+          <div className="calendar-settings">
+            <button
+              type="button"
+              className="calendar-settings-button"
+              onClick={() => setSettingsOpen(open => !open)}
+              aria-label="Challenge settings"
+              aria-expanded={settingsOpen}
+            >
+              <Settings size={16} />
+            </button>
+            {settingsOpen && (
+              <div className="calendar-settings-popover">
+                <div className="calendar-settings-header">
+                  <span>Start date</span>
+                  <button
+                    type="button"
+                    className="calendar-settings-close"
+                    onClick={() => setSettingsOpen(false)}
+                    aria-label="Close settings"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+                <input
+                  type="date"
+                  value={formatDate(startDate)}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      onStartDateChange(e.target.value)
+                    }
+                    setSettingsOpen(false)
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -122,15 +164,27 @@ const ChallengeCalendar = ({ startDate, totalDays = 90, scorecards }: ChallengeC
       </div>
 
       <div className="calendar-grid">
-        {cells.map((cell, idx) => (
-          <div
-            key={idx}
-            className={`calendar-cell ${getHeatClass(cell.count, cell.isFuture, cell.isInRange)} ${cell.isToday ? "today" : ""}`}
-            title={cell.dayNumber ? `Day ${cell.dayNumber} · ${cell.dateKey} · ${cell.count} logged` : ""}
-          >
-            {cell.dayNumber && <span className="cell-day">{cell.dayNumber}</span>}
-          </div>
-        ))}
+        {cells.map((cell, idx) => {
+          const isMonthStart = cell.isInRange && cell.date.getDate() === 1
+          return (
+            <div
+              key={idx}
+              className={`calendar-cell ${getHeatClass(cell.count, cell.isFuture, cell.isInRange)} ${cell.isToday && cell.isInRange ? "today" : ""}`}
+              title={cell.isInRange ? `${cell.dateKey} · Day ${cell.dayNumber!} · ${cell.count} logged` : ""}
+            >
+              {cell.isInRange && (
+                <>
+                  {isMonthStart && (
+                    <span className="cell-month">
+                      {cell.date.toLocaleDateString(undefined, { month: "short" })}
+                    </span>
+                  )}
+                  <span className="cell-day">{cell.date.getDate()}</span>
+                </>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
