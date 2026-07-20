@@ -1,25 +1,25 @@
 # Planner
 
-## Backend
+## Run with Docker Compose
 
-The FastAPI service and PostgreSQL database run together with Docker Compose:
+The frontend, FastAPI service, and PostgreSQL database run together with Docker
+Compose:
 
 ```sh
 docker compose up --build
 ```
 
-The API is available at http://localhost:8000. Use http://localhost:8000/health
-to check that it is running; it returns `{"status":"ok"}`. Interactive API
-documentation is available at http://localhost:8000/docs.
+Open the app at http://localhost:5173. The API is available at
+http://localhost:8000; use http://localhost:8000/health to check that it is
+running, and http://localhost:8000/docs for interactive API documentation.
 
-`docker-compose.yml` is kept at the repository root so a frontend service can
-be added later. The database volume (`postgres_data`) persists PostgreSQL data
-between container restarts. Alembic and SQLAlchemy are installed in the backend
-image for the upcoming data-model and migration work.
+The frontend container serves the production Vite build and proxies `/v1`
+requests to the API. The database volume (`postgres_data`) persists PostgreSQL
+data between container restarts.
 
 ## Frontend
 
-Start the backend stack first, then run the Vite frontend in a second terminal:
+For frontend-only development, start the API stack and then run Vite locally:
 
 ```sh
 cd frontend
@@ -33,8 +33,7 @@ has no browser persistence: areas, challenge dates, and activity logs are read
 from and written to the API. Until authentication is added, it bootstraps the
 single local user `planner@local`.
 
-To point a production build at a separately hosted API, set `VITE_API_URL` to
-that API's origin before building the frontend.
+For the Compose setup, frontend API requests are proxied automatically.
 
 ## Tests
 
