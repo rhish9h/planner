@@ -331,23 +331,23 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  padding: 32px 24px;
+  padding: 20px;
   line-height: 1.5;
 }
 
 .dashboard-header {
-  margin-bottom: 28px;
+  margin-bottom: 18px;
 }
 
 .dashboard-header h1 {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .dashboard-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--muted);
 }
 
@@ -403,32 +403,32 @@ body {
 .add-scorecard-card {
   background: var(--card);
   border-radius: 12px;
-  padding: 20px;
+  padding: 14px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .add-scorecard-title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   color: var(--text);
 }
 
 .add-scorecard-form {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   align-items: center;
 }
 
 .add-scorecard-form input {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 14px;
-  min-width: 180px;
+  font-size: 13px;
+  min-width: 160px;
   background: var(--card);
   color: var(--text);
 }
@@ -458,37 +458,37 @@ body {
 .scorecard-section {
   background: var(--card);
   border-radius: 12px;
-  padding: 20px;
+  padding: 14px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .scorecard-section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .scorecard-section .empty-state {
   background: transparent;
   box-shadow: none;
   border: none;
-  padding: 32px 20px;
+  padding: 24px 16px;
 }
 
 .scorecard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
   align-items: start;
 }
 
 .scorecard {
   background: var(--card);
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 14px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -503,49 +503,49 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .scorecard-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .scorecard-title-text {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .scorecard-title h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
 }
 
 .scorecard-icon {
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg);
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .completed-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  gap: 3px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--success);
   background: #ecfdf5;
   border-radius: 999px;
-  padding: 2px 8px;
+  padding: 1px 6px;
   width: fit-content;
 }
 
@@ -593,8 +593,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  font-size: 14px;
+  margin-bottom: 8px;
+  font-size: 13px;
   color: var(--muted);
 }
 
@@ -629,11 +629,11 @@ body {
 }
 
 .progress-bar {
-  height: 10px;
+  height: 8px;
   background: var(--border);
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .progress-fill {
@@ -662,18 +662,18 @@ body {
 .scorecard-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .scorecard-controls button.control-button {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border: 1px solid var(--border);
   background: var(--card);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -693,31 +693,31 @@ body {
 }
 
 .scorecard-controls input {
-  width: 72px;
-  padding: 8px;
+  width: 60px;
+  padding: 6px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
 
 .status-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--muted);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   display: block;
 }
 
 .status-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-left: 4px solid transparent;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text);
   background: var(--card);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -851,10 +851,10 @@ body {
 .challenge-calendar {
   background: var(--card);
   border-radius: 12px;
-  padding: 20px;
+  padding: 14px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   overflow-x: auto;
 }
 
@@ -862,29 +862,29 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
 .calendar-header h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .calendar-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
 .calendar-legend {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
 }
 
@@ -928,13 +928,13 @@ body {
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 6px;
+  gap: 3px;
+  margin-bottom: 4px;
 }
 
 .calendar-weekday {
   text-align: center;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -943,22 +943,22 @@ body {
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(28px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(7, minmax(20px, 1fr));
+  gap: 3px;
 }
 
 .calendar-cell {
   aspect-ratio: 1;
-  border-radius: 6px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
   color: var(--text);
   background: var(--card);
   border: 1px solid var(--border);
-  min-height: 28px;
+  min-height: 20px;
 }
 
 .calendar-cell.outside {
@@ -1004,13 +1004,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
 .calendar-section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 0;
@@ -1019,17 +1019,17 @@ body {
 .calendar-start-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
   color: var(--muted);
   font-weight: 500;
 }
 
 .calendar-start-label input {
-  padding: 6px 10px;
+  padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text);
   background: var(--card);
 }
