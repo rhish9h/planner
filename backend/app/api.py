@@ -40,6 +40,13 @@ def build_router(get_session):
         session.refresh(user)
         return user
 
+    @router.get("/users", response_model=UserRead)
+    def get_user_by_email(email: str, session: Session = Depends(get_session)):
+        user = session.scalar(select(User).where(User.email == email))
+        if not user:
+            raise not_found("user")
+        return user
+
     @router.post("/challenges", response_model=ChallengeRead, status_code=status.HTTP_201_CREATED)
     def create_challenge(payload: ChallengeCreate, session: Session = Depends(get_session)):
         if not session.get(User, payload.user_id):

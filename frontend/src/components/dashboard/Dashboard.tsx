@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, X, Target, Flame } from "lucide-react";
 import Scorecard, { type Activity, type ScorecardData } from "../scorecard/Scorecard";
 import ChallengeCalendar from "../calendar/ChallengeCalendar";
@@ -8,29 +8,13 @@ import ActivityHistoryModal from "../activity/ActivityHistoryModal";
 import DayActivitiesModal from "../activity/DayActivitiesModal";
 import EditActivityModal from "../activity/EditActivityModal";
 import ConfirmDeleteModal from "../activity/ConfirmDeleteModal";
-import { iconOptions, migrateIcon } from "../iconPicker/iconOptions";
-import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { iconOptions } from "../iconPicker/iconOptions";
+import { createActivity, createArea, deleteActivity, deleteArea, loadDashboard, toScorecards, updateActivity, updateArea, updateChallenge, type DashboardData } from "../../api/planner";
 import { computeCurrentStreak, computeBestStreak, daysBetween, todayKey } from "../../utils/date";
 import { computePace } from "../../utils/pace";
 import { getDefaultScorecardColor } from "../../utils/colors";
 
 const TOTAL_DAYS = 90
-
-const initialData: ScorecardData[] = [
-  { id: "1", area: "Leetcode", icon: "Laptop", color: getDefaultScorecardColor(0), startingCount: 9, target: 150, activities: [] },
-  { id: "2", area: "System Design", icon: "Puzzle", color: getDefaultScorecardColor(1), startingCount: 0, target: 90, activities: [] },
-  { id: "3", area: "Low Level Design", icon: "Palette", color: getDefaultScorecardColor(2), startingCount: 0, target: 60, activities: [] },
-  { id: "4", area: "Cyclo Veda", icon: "BookOpen", color: getDefaultScorecardColor(3), startingCount: 0, target: 120, activities: [] },
-  { id: "5", area: "Fitness", icon: "Dumbbell", color: getDefaultScorecardColor(4), startingCount: 0, target: 90, activities: [] },
-  { id: "6", area: "Job Applications", icon: "Briefcase", color: getDefaultScorecardColor(5), startingCount: 0, target: 50, activities: [] },
-]
-
-type LegacyScorecard = Omit<ScorecardData, "startingCount" | "activities"> & {
-  current?: number
-  history?: string[]
-  startingCount?: number
-  activities?: ScorecardData["activities"]
-}
 
 interface LoggingContext {
   areaId?: string
@@ -46,56 +30,50 @@ type DeleteRequest =
   | { kind: "area", areaId: string, areaName: string }
   | { kind: "activity", areaId: string, activityId: string }
 
-const normalizeScorecards = (cards: Array<ScorecardData | LegacyScorecard>): ScorecardData[] => cards.map((card, index) => {
-  const legacyCard = card as LegacyScorecard
-  const activities = Array.isArray(legacyCard.activities)
-    ? legacyCard.activities
-    : (legacyCard.history ?? []).map((dateKey, activityIndex) => ({
-        id: `migrated-${legacyCard.id}-${activityIndex}`,
-        loggedAt: `${dateKey}T12:00:00`,
-      }))
-  const startingCount = legacyCard.startingCount ?? Math.max(0, (legacyCard.current ?? 0) - activities.length)
-  return {
-    id: legacyCard.id,
-    area: legacyCard.area,
-    icon: migrateIcon(legacyCard.icon),
-    color: legacyCard.color ?? getDefaultScorecardColor(index),
-    target: legacyCard.target,
-    startingCount,
-    activities,
-  }
-})
-
 const Dashboard = () => {
-  const [storedScorecards, setStoredScorecards] = useLocalStorage<Array<ScorecardData | LegacyScorecard>>("tracker.scorecards", initialData)
-  const scorecards = useMemo(() => normalizeScorecards(storedScorecards), [storedScorecards])
-  const setScorecards = (update: SetStateAction<ScorecardData[]>) => {
-    setStoredScorecards(previous => {
-      const normalized = normalizeScorecards(previous)
-      return typeof update === "function" ? update(normalized) : update
-    })
-  }
-  const migratedRef = useRef(false)
+  const [scorecards, setScorecards] = useState<ScorecardData[]>([])
+  const [challenge, setChallenge] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [newArea, setNewArea] = useState("")
   const [newTarget, setNewTarget] = useState("")
   const [newIcon, setNewIcon] = useState<string>(iconOptions[0])
-  const [newColor, setNewColor] = useState<string>(() => getDefaultScorecardColor(scorecards.length))
+  const [newColor, setNewColor] = useState<string>(getDefaultScorecardColor(0))
   const [loggingContext, setLoggingContext] = useState<LoggingContext | null>(null)
   const [historyAreaId, setHistoryAreaId] = useState<string | null>(null)
   const [editingActivity, setEditingActivity] = useState<EditingActivityContext | null>(null)
   const [deleteRequest, setDeleteRequest] = useState<DeleteRequest | null>(null)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (migratedRef.current) return
-    migratedRef.current = true
-    const migrated = normalizeScorecards(storedScorecards)
-    if (JSON.stringify(migrated) !== JSON.stringify(storedScorecards)) {
-      setStoredScorecards(migrated)
-    }
-  }, [storedScorecards, setStoredScorecards])
-  const [challengeStartKey, setChallengeStartKey] = useLocalStorage<string>("tracker.challengeStart", () => todayKey())
   const [addExpanded, setAddExpanded] = useState(false)
+
+  const refreshDashboard = async () => {
+    setLoading(true)
+    try {
+      const dashboard = await loadDashboard()
+      setChallenge(dashboard)
+      setScorecards(toScorecards(dashboard.areas))
+      setError(null)
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to load your planner")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { void refreshDashboard() }, [])
+
+  const runMutation = async (mutation: () => Promise<unknown>) => {
+    try {
+      await mutation()
+      await refreshDashboard()
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to save your changes")
+    }
+  }
+
+  const challengeStartKey = challenge?.start_date ?? todayKey()
+  const totalDays = challenge?.duration_days ?? TOTAL_DAYS
 
   const challengeStart = useMemo(() => {
     const [y, m, d] = challengeStartKey.split("-").map(Number)
@@ -103,8 +81,8 @@ const Dashboard = () => {
   }, [challengeStartKey])
 
   const daysElapsed = useMemo(() => {
-    return Math.min(TOTAL_DAYS, Math.max(0, daysBetween(challengeStart, new Date()) + 1))
-  }, [challengeStart])
+    return Math.min(totalDays, Math.max(0, daysBetween(challengeStart, new Date()) + 1))
+  }, [challengeStart, totalDays])
 
   const summary = useMemo(() => {
     const totalGoals = scorecards.length
@@ -118,7 +96,7 @@ const Dashboard = () => {
         )
 
     const onPaceCount = scorecards.filter(card => {
-      const { className } = computePace(card.startingCount + card.activities.length, card.target, daysElapsed, TOTAL_DAYS)
+      const { className } = computePace(card.startingCount + card.activities.length, card.target, daysElapsed, totalDays)
       return className === "complete" || className === "ahead" || className === "on-pace" || className === "starting"
     }).length
 
@@ -132,47 +110,25 @@ const Dashboard = () => {
       onPaceCount,
       currentStreak,
       bestStreak,
-      daysRemaining: Math.max(0, TOTAL_DAYS - daysElapsed),
+      daysRemaining: Math.max(0, totalDays - daysElapsed),
     }
-  }, [scorecards, daysElapsed])
+  }, [scorecards, daysElapsed, totalDays])
 
   const handleDelete = (id: string) => {
     const area = scorecards.find(card => card.id === id)
     if (area) setDeleteRequest({ kind: "area", areaId: id, areaName: area.area })
   }
 
-  const handleIconChange = (id: string, icon: string) => {
-    setScorecards(prev => prev.map(card => 
-      card.id === id ? { ...card, icon } : card
-    ))
-  }
+  const handleIconChange = (id: string, icon: string) => void runMutation(() => updateArea(id, { icon }))
 
-  const handleColorChange = (id: string, color: string) => {
-    setScorecards(prev => prev.map(card => 
-      card.id === id ? { ...card, color } : card
-    ))
-  }
+  const handleColorChange = (id: string, color: string) => void runMutation(() => updateArea(id, { color }))
 
-  const handleAreaChange = (id: string, area: string) => {
-    setScorecards(prev => prev.map(card => 
-      card.id === id ? { ...card, area } : card
-    ))
-  }
+  const handleAreaChange = (id: string, area: string) => void runMutation(() => updateArea(id, { name: area }))
 
-  const handleTargetChange = (id: string, target: number) => {
-    if (target <= 0) return
-    setScorecards(prev => prev.map(card => 
-      card.id === id ? { ...card, target } : card
-    ))
-  }
+  const handleTargetChange = (id: string, target: number) => { if (target > 0) void runMutation(() => updateArea(id, { target })) }
 
   const handleLogActivity = (areaId: string, description: string, url: string, dateKey: string) => {
-    setScorecards(prev => prev.map(card =>
-      card.id === areaId ? {
-        ...card,
-        activities: [...card.activities, { id: crypto.randomUUID(), loggedAt: new Date(`${dateKey}T12:00:00`).toISOString(), ...(description && { description }), ...(url && { url }) }],
-      } : card
-    ))
+    void runMutation(() => createActivity(areaId, { activity_date: dateKey, description: description || null, url: url || null }))
     setLoggingContext(null)
   }
 
@@ -183,31 +139,13 @@ const Dashboard = () => {
 
   const confirmDelete = () => {
     if (!deleteRequest) return
-    if (deleteRequest.kind === "area") {
-      setScorecards(prev => prev.filter(card => card.id !== deleteRequest.areaId))
-    } else {
-      setScorecards(prev => prev.map(card => card.id === deleteRequest.areaId
-        ? { ...card, activities: card.activities.filter(activity => activity.id !== deleteRequest.activityId) }
-        : card
-      ))
-    }
+    void runMutation(() => deleteRequest.kind === "area" ? deleteArea(deleteRequest.areaId) : deleteActivity(deleteRequest.activityId))
     setDeleteRequest(null)
   }
 
   const handleEditActivity = (activity: Activity, dateKey: string, description: string, url: string) => {
     if (!editingActivity) return
-    setScorecards(prev => prev.map(card => {
-      if (card.id !== editingActivity.areaId) return card
-      return {
-        ...card,
-        activities: card.activities.map(current => current.id === activity.id ? {
-          ...current,
-          loggedAt: new Date(`${dateKey}T12:00:00`).toISOString(),
-          ...(description ? { description } : { description: undefined }),
-          ...(url ? { url } : { url: undefined }),
-        } : current),
-      }
-    }))
+    void runMutation(() => updateActivity(activity.id, { activity_date: dateKey, description: description || null, url: url || null }))
     setEditingActivity(null)
   }
 
@@ -216,17 +154,8 @@ const Dashboard = () => {
     const target = parseInt(newTarget, 10)
     if (!newArea.trim() || !target || target <= 0) return
 
-    const newScorecard: ScorecardData = {
-      id: crypto.randomUUID(),
-      area: newArea.trim(),
-      icon: newIcon,
-      color: newColor,
-      target,
-      startingCount: 0,
-      activities: [],
-    }
-
-    setScorecards(prev => [...prev, newScorecard])
+    if (!challenge) return
+    void runMutation(() => createArea(challenge.id, { name: newArea.trim(), icon: newIcon, color: newColor, target, starting_count: 0 }))
     setNewArea("")
     setNewTarget("")
     setNewIcon(iconOptions[0])
@@ -286,16 +215,21 @@ const Dashboard = () => {
     </button>
   )
 
+  if (loading && !challenge) {
+    return <div className="dashboard"><p className="empty-activity-state">Loading your planner…</p></div>
+  }
+
   return (
     <div className="dashboard">
       <header className="dashboard-header">
         <div>
           <h1>90-Day Challenge</h1>
           <p className="dashboard-subtitle">
-            Day {daysElapsed} of {TOTAL_DAYS} · {summary.daysRemaining} days left — small daily reps compound into big results.
+            Day {daysElapsed} of {totalDays} · {summary.daysRemaining} days left — small daily reps compound into big results.
           </p>
         </div>
       </header>
+      {error && <p className="empty-activity-state" role="alert">{error}</p>}
 
       <div className="dashboard-content">
         <section className="scorecard-section">
@@ -328,7 +262,7 @@ const Dashboard = () => {
                   key={card.id}
                   data={card}
                   daysElapsed={daysElapsed}
-                  totalDays={TOTAL_DAYS}
+                  totalDays={totalDays}
                   onIconChange={handleIconChange}
                   onColorChange={handleColorChange}
                   onAreaChange={handleAreaChange}
@@ -362,8 +296,8 @@ const Dashboard = () => {
         <section className="calendar-section">
           <ChallengeCalendar
             startDate={challengeStart}
-            onStartDateChange={setChallengeStartKey}
-            totalDays={TOTAL_DAYS}
+            onStartDateChange={dateKey => { if (challenge) void runMutation(() => updateChallenge(challenge.id, { start_date: dateKey })) }}
+            totalDays={totalDays}
             scorecards={scorecards}
             onDateSelect={setSelectedCalendarDate}
           />

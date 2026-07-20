@@ -17,6 +17,25 @@ be added later. The database volume (`postgres_data`) persists PostgreSQL data
 between container restarts. Alembic and SQLAlchemy are installed in the backend
 image for the upcoming data-model and migration work.
 
+## Frontend
+
+Start the backend stack first, then run the Vite frontend in a second terminal:
+
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+Open the URL printed by Vite (normally http://localhost:5173). During local
+development, Vite proxies `/v1` requests to the API on port 8000. The frontend
+has no browser persistence: areas, challenge dates, and activity logs are read
+from and written to the API. Until authentication is added, it bootstraps the
+single local user `planner@local`.
+
+To point a production build at a separately hosted API, set `VITE_API_URL` to
+that API's origin before building the frontend.
+
 ## Tests
 
 Run the end-to-end API suite against an isolated PostgreSQL database:
