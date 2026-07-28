@@ -2,16 +2,22 @@ from fastapi.testclient import TestClient
 
 
 def test_create_list_update_and_delete_area(client: TestClient, challenge: dict) -> None:
-    created = client.post(f"/v1/challenges/{challenge['id']}/areas", json={"name": "Fitness", "target": 90})
+    created = client.post(f"/v1/challenges/{challenge['id']}/areas", json={
+        "name": "Fitness", "goal": "Exercise for 30 minutes", "target": 90,
+    })
     assert created.status_code == 201
     area = created.json()
+    assert area["goal"] == "Exercise for 30 minutes"
 
     listed = client.get(f"/v1/challenges/{challenge['id']}/areas")
     assert listed.status_code == 200
     assert [item["id"] for item in listed.json()] == [area["id"]]
 
-    updated = client.patch(f"/v1/areas/{area['id']}", json={"target": 120, "color": "#22c55e"})
+    updated = client.patch(f"/v1/areas/{area['id']}", json={
+        "goal": "Exercise for 45 minutes", "target": 120, "color": "#22c55e",
+    })
     assert updated.status_code == 200
+    assert updated.json()["goal"] == "Exercise for 45 minutes"
     assert updated.json()["target"] == 120
     assert updated.json()["color"] == "#22c55e"
 
@@ -20,6 +26,11 @@ def test_create_list_update_and_delete_area(client: TestClient, challenge: dict)
 
 
 def test_area_name_is_unique_within_a_challenge(client: TestClient, challenge: dict) -> None:
-    payload = {"name": "Fitness", "target": 90}
+    payload = {"name": "Fitness", "goal": "Exercise for 30 minutes", "target": 90}
     assert client.post(f"/v1/challenges/{challenge['id']}/areas", json=payload).status_code == 201
     assert client.post(f"/v1/challenges/{challenge['id']}/areas", json=payload).status_code == 409
+
+
+def test_area_requires_a_goal(client: TestClient, challenge: dict) -> None:
+    response = client.post(f"/v1/challenges/{challenge['id']}/areas", json={"name": "Fitness", "target": 90})
+    assert response.status_code == 422

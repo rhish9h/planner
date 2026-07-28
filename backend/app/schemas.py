@@ -44,6 +44,7 @@ class ChallengeRead(ORMModel):
 
 class AreaCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
+    goal: str = Field(min_length=1, max_length=500)
     target: int = Field(gt=0)
     starting_count: int = Field(default=0, ge=0)
     icon: str = Field(default="Target", min_length=1, max_length=80)
@@ -52,6 +53,7 @@ class AreaCreate(BaseModel):
 
 class AreaUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
+    goal: str | None = Field(default=None, min_length=1, max_length=500)
     target: int | None = Field(default=None, gt=0)
     starting_count: int | None = Field(default=None, ge=0)
     icon: str | None = Field(default=None, min_length=1, max_length=80)
@@ -62,6 +64,7 @@ class AreaRead(ORMModel):
     id: str
     challenge_id: str
     name: str
+    goal: str
     target: int
     starting_count: int
     icon: str

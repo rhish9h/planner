@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [newArea, setNewArea] = useState("")
+  const [newGoal, setNewGoal] = useState("")
   const [newTarget, setNewTarget] = useState("")
   const [newIcon, setNewIcon] = useState<string>(iconOptions[0])
   const [newColor, setNewColor] = useState<string>(getDefaultScorecardColor(0))
@@ -125,6 +126,11 @@ const Dashboard = () => {
 
   const handleAreaChange = (id: string, area: string) => void runMutation(() => updateArea(id, { name: area }))
 
+  const handleGoalChange = (id: string, goal: string) => {
+    const trimmedGoal = goal.trim()
+    if (trimmedGoal) void runMutation(() => updateArea(id, { goal: trimmedGoal }))
+  }
+
   const handleTargetChange = (id: string, target: number) => { if (target > 0) void runMutation(() => updateArea(id, { target })) }
 
   const handleLogActivity = (areaId: string, description: string, url: string, dateKey: string) => {
@@ -152,11 +158,12 @@ const Dashboard = () => {
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
     const target = parseInt(newTarget, 10)
-    if (!newArea.trim() || !target || target <= 0) return
+    if (!newArea.trim() || !newGoal.trim() || !target || target <= 0) return
 
     if (!challenge) return
-    void runMutation(() => createArea(challenge.id, { name: newArea.trim(), icon: newIcon, color: newColor, target, starting_count: 0 }))
+    void runMutation(() => createArea(challenge.id, { name: newArea.trim(), goal: newGoal.trim(), icon: newIcon, color: newColor, target, starting_count: 0 }))
     setNewArea("")
+    setNewGoal("")
     setNewTarget("")
     setNewIcon(iconOptions[0])
     setNewColor(getDefaultScorecardColor(scorecards.length + 1))
@@ -183,6 +190,15 @@ const Dashboard = () => {
           value={newArea}
           onChange={(e) => setNewArea(e.target.value)}
           aria-label="Area name"
+        />
+        <input
+          type="text"
+          placeholder="Goal (e.g. Solve a Leetcode problem)"
+          value={newGoal}
+          onChange={(e) => setNewGoal(e.target.value)}
+          aria-label="Area goal"
+          maxLength={500}
+          required
         />
         <input
           type="number"
@@ -266,6 +282,7 @@ const Dashboard = () => {
                   onIconChange={handleIconChange}
                   onColorChange={handleColorChange}
                   onAreaChange={handleAreaChange}
+                  onGoalChange={handleGoalChange}
                   onTargetChange={handleTargetChange}
                   onDelete={handleDelete}
                   onLogActivity={areaId => setLoggingContext({ areaId, dateKey: todayKey() })}

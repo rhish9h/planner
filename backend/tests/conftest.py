@@ -67,7 +67,7 @@ def challenge(client: TestClient, user: dict) -> dict:
 @pytest.fixture
 def area(client: TestClient, challenge: dict) -> dict:
     response = client.post(f"/v1/challenges/{challenge['id']}/areas", json={
-        "name": "Leetcode", "target": 150, "starting_count": 9, "icon": "Laptop", "color": "#4f46e5",
+        "name": "Leetcode", "goal": "Solve a Leetcode problem", "target": 150, "starting_count": 9, "icon": "Laptop", "color": "#4f46e5",
     })
     assert response.status_code == 201
     return response.json()

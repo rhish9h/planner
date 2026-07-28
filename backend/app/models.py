@@ -43,6 +43,7 @@ class Area(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
     challenge_id: Mapped[str] = mapped_column(ForeignKey("challenges.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(120))
+    goal: Mapped[str] = mapped_column(String(500))
     target: Mapped[int] = mapped_column(Integer)
     starting_count: Mapped[int] = mapped_column(Integer, default=0)
     icon: Mapped[str] = mapped_column(String(80), default="Target")

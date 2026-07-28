@@ -8,6 +8,7 @@ import { computeCurrentStreak, computeBestStreak, todayKey } from "../../utils/d
 export interface ScorecardData {
   id: string
   area: string
+  goal: string
   icon: string
   color?: string
   target: number
@@ -29,6 +30,7 @@ interface ScorecardProps {
   onIconChange: (id: string, icon: string) => void
   onColorChange: (id: string, color: string) => void
   onAreaChange: (id: string, area: string) => void
+  onGoalChange: (id: string, goal: string) => void
   onTargetChange: (id: string, target: number) => void
   onDelete: (id: string) => void
   onLogActivity: (id: string) => void
@@ -42,7 +44,7 @@ const getProgressClass = (percentage: number) => {
   return "low"
 }
 
-const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, onAreaChange, onTargetChange, onDelete, onLogActivity, onViewHistory }: ScorecardProps) => {
+const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, onAreaChange, onGoalChange, onTargetChange, onDelete, onLogActivity, onViewHistory }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const AreaIcon = getAreaIcon(data.icon)
@@ -58,7 +60,7 @@ const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, 
   return (
     <div className="scorecard">
       <div className="scorecard-header">
-        <div className="scorecard-title">
+        <div className="scorecard-title" title={data.goal} aria-label={`${data.area}: ${data.goal}`}>
           <span className="scorecard-icon" style={{ color: data.color }}><AreaIcon size={20} /></span>
           <div className="scorecard-title-text">
             <h3>{data.area}</h3>
@@ -117,6 +119,15 @@ const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, 
               type="text"
               value={data.area}
               onChange={(e) => onAreaChange(data.id, e.target.value)}
+            />
+          </div>
+          <div className="edit-field">
+            <label className="edit-label">Goal</label>
+            <input
+              type="text"
+              value={data.goal}
+              onChange={(e) => onGoalChange(data.id, e.target.value)}
+              maxLength={500}
             />
           </div>
           <div className="edit-field">

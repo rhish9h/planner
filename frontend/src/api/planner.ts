@@ -15,6 +15,7 @@ interface ApiActivity {
 interface ApiArea {
   id: string
   name: string
+  goal: string
   target: number
   starting_count: number
   icon: string
@@ -42,13 +43,18 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 const defaultAreas = [
-  ["Leetcode", "Laptop", 9, 150], ["System Design", "Puzzle", 0, 90], ["Low Level Design", "Palette", 0, 60],
-  ["Cyclo Veda", "BookOpen", 0, 120], ["Fitness", "Dumbbell", 0, 90], ["Job Applications", "Briefcase", 0, 50],
+  ["Leetcode", "Solve a Leetcode problem", "Laptop", 9, 150],
+  ["System Design", "Solve a system design problem in an interactive ChatGPT session", "Puzzle", 0, 90],
+  ["Low Level Design", "Solve a low-level design problem", "Palette", 0, 60],
+  ["Cyclo Veda", "Build a feature for Cyclo Veda", "BookOpen", 0, 120],
+  ["Fitness", "Exercise for 30 minutes", "Dumbbell", 0, 90],
+  ["Job Applications", "Submit a job application", "Briefcase", 0, 50],
 ] as const
 
 export const toScorecards = (areas: ApiArea[]): ScorecardData[] => areas.map((area, index) => ({
   id: area.id,
   area: area.name,
+  goal: area.goal,
   icon: area.icon,
   color: area.color || getDefaultScorecardColor(index),
   target: area.target,
@@ -78,9 +84,9 @@ export async function loadDashboard(): Promise<DashboardData> {
       method: "POST",
       body: JSON.stringify({ user_id: user.id, start_date: new Date().toISOString().slice(0, 10) }),
     })
-    await Promise.all(defaultAreas.map(([name, icon, starting_count, target], index) => request(`/v1/challenges/${challenge.id}/areas`, {
+    await Promise.all(defaultAreas.map(([name, goal, icon, starting_count, target], index) => request(`/v1/challenges/${challenge.id}/areas`, {
       method: "POST",
-      body: JSON.stringify({ name, icon, starting_count, target, color: getDefaultScorecardColor(index) }),
+      body: JSON.stringify({ name, goal, icon, starting_count, target, color: getDefaultScorecardColor(index) }),
     })))
     return request(`/v1/challenges/current?user_id=${user.id}`)
   }
