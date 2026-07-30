@@ -35,7 +35,7 @@ const LogActivityModal = ({ areas, initialAreaId, initialDate, minDate, maxDate,
         </div>
         <form onSubmit={event => {
           event.preventDefault()
-          if (areaId && loggedDate) onSubmit(areaId, description.trim(), url.trim(), loggedDate)
+          if (areaId && loggedDate) void onSubmit(areaId, description.trim(), url.trim(), loggedDate)
         }}>
           {!initialAreaId && <label>
             Area

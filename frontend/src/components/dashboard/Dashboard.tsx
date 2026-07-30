@@ -21,6 +21,12 @@ interface LoggingContext {
   dateKey: string
 }
 
+interface LogCelebration {
+  id: number
+  areaId: string
+  dateKey: string
+}
+
 interface EditingActivityContext {
   areaId: string
   activity: Activity
@@ -45,6 +51,7 @@ const Dashboard = () => {
   const [editingActivity, setEditingActivity] = useState<EditingActivityContext | null>(null)
   const [deleteRequest, setDeleteRequest] = useState<DeleteRequest | null>(null)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
+  const [logCelebration, setLogCelebration] = useState<LogCelebration | null>(null)
 
   const [addExpanded, setAddExpanded] = useState(false)
 
@@ -63,6 +70,12 @@ const Dashboard = () => {
   }
 
   useEffect(() => { void refreshDashboard() }, [])
+
+  useEffect(() => {
+    if (!logCelebration) return
+    const timeout = window.setTimeout(() => setLogCelebration(null), 1250)
+    return () => window.clearTimeout(timeout)
+  }, [logCelebration])
 
   const runMutation = async (mutation: () => Promise<unknown>) => {
     try {
@@ -133,9 +146,16 @@ const Dashboard = () => {
 
   const handleTargetChange = (id: string, target: number) => { if (target > 0) void runMutation(() => updateArea(id, { target })) }
 
-  const handleLogActivity = (areaId: string, description: string, url: string, dateKey: string) => {
-    void runMutation(() => createActivity(areaId, { activity_date: dateKey, description: description || null, url: url || null }))
-    setLoggingContext(null)
+  const handleLogActivity = async (areaId: string, description: string, url: string, dateKey: string) => {
+    try {
+      await createActivity(areaId, { activity_date: dateKey, description: description || null, url: url || null })
+      setLoggingContext(null)
+      await refreshDashboard()
+      setLogCelebration({ id: Date.now(), areaId, dateKey })
+      navigator.vibrate?.(18)
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to save your changes")
+    }
   }
 
   const handleDeleteActivity = (id: string) => {
@@ -287,6 +307,7 @@ const Dashboard = () => {
                   onDelete={handleDelete}
                   onLogActivity={areaId => setLoggingContext({ areaId, dateKey: todayKey() })}
                   onViewHistory={setHistoryAreaId}
+                  celebrationId={logCelebration?.areaId === card.id ? logCelebration.id : undefined}
                 />
               ))}
               {addAreaCard}
@@ -317,6 +338,7 @@ const Dashboard = () => {
             totalDays={totalDays}
             scorecards={scorecards}
             onDateSelect={setSelectedCalendarDate}
+            celebration={logCelebration}
           />
         </section>
       </div>

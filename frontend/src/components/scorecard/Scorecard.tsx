@@ -35,6 +35,7 @@ interface ScorecardProps {
   onDelete: (id: string) => void
   onLogActivity: (id: string) => void
   onViewHistory: (id: string) => void
+  celebrationId?: number
 }
 
 const getProgressClass = (percentage: number) => {
@@ -44,14 +45,14 @@ const getProgressClass = (percentage: number) => {
   return "low"
 }
 
-const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, onAreaChange, onGoalChange, onTargetChange, onDelete, onLogActivity, onViewHistory }: ScorecardProps) => {
+const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, onAreaChange, onGoalChange, onTargetChange, onDelete, onLogActivity, onViewHistory, celebrationId }: ScorecardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const AreaIcon = getAreaIcon(data.icon)
   const current = data.startingCount + data.activities.length
-  const percentage = data.target > 0 ? Math.round((current / data.target) * 100) : 0
+  const percentage = data.target > 0 ? Math.min(100, Math.round((current / data.target) * 100)) : 0
   const progressClass = getProgressClass(percentage)
-  const isCompleted = percentage === 100
+  const isCompleted = percentage >= 100
   const pace = computePace(current, data.target, daysElapsed, totalDays)
   const activityDays = data.activities.map(activity => todayKey(new Date(activity.loggedAt)))
   const currentStreak = computeCurrentStreak(activityDays)
@@ -177,17 +178,28 @@ const Scorecard = ({ data, daysElapsed, totalDays, onIconChange, onColorChange, 
         >
           <History size={16} /> History
         </button>
-        {!isCompleted ? (
-          <button
-            className="activity-action-button log-today-button"
-            onClick={() => onLogActivity(data.id)}
-            aria-label={`Log an activity for ${data.area}`}
-          >
-            <Plus size={16} /> Log
-          </button>
-        ) : (
-          <span className="completed-badge"><Check size={12} /> Done</span>
-        )}
+        <button
+          key={celebrationId ?? "ready"}
+          className={`activity-action-button log-today-button ${celebrationId ? "is-celebrating" : ""}`}
+          onClick={() => onLogActivity(data.id)}
+          aria-label={celebrationId ? `Activity logged for ${data.area}` : `Log an activity for ${data.area}`}
+        >
+          <span className="log-button-content log-button-default" aria-live="polite">
+            <Plus size={16} />
+            <span>Log</span>
+          </span>
+          {celebrationId && (
+            <>
+              <span className="log-button-content log-button-success" aria-hidden="true">
+                <Check size={16} />
+                <span>Logged!</span>
+              </span>
+            <span className="log-celebration-burst" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, index) => <span key={`${celebrationId}-${index}`} className={`burst-particle particle-${index + 1}`} />)}
+            </span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   )

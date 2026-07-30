@@ -903,6 +903,7 @@ body {
 }
 
 .log-today-button {
+  position: relative;
   flex: 1;
   min-width: 70px;
   padding: 8px 12px;
@@ -915,9 +916,91 @@ body {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
   transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.log-button-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.log-button-success {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.log-today-button.is-celebrating {
+  animation: log-button-success 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.log-today-button.is-celebrating .log-button-default {
+  animation: log-label-hide 900ms ease both;
+}
+
+.log-today-button.is-celebrating .log-button-success {
+  animation: log-label-success 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.log-celebration-burst {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.burst-particle {
+  --burst-x: 0px;
+  --burst-y: 0px;
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #fde68a;
+  box-shadow: 0 0 8px rgba(253, 230, 138, 0.9);
+  animation: log-burst 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.particle-1 { --burst-x: 0px; --burst-y: -24px; }
+.particle-2 { --burst-x: 17px; --burst-y: -17px; background: #ffffff; }
+.particle-3 { --burst-x: 25px; --burst-y: 0px; }
+.particle-4 { --burst-x: 17px; --burst-y: 17px; background: #ffffff; }
+.particle-5 { --burst-x: 0px; --burst-y: 24px; }
+.particle-6 { --burst-x: -17px; --burst-y: 17px; background: #ffffff; }
+.particle-7 { --burst-x: -25px; --burst-y: 0px; }
+.particle-8 { --burst-x: -17px; --burst-y: -17px; background: #ffffff; }
+
+@keyframes log-button-success {
+  0% { transform: scale(1); }
+  12% { transform: scale(0.96); }
+  42% { transform: scale(1.1); }
+  65% { transform: scale(0.985); }
+  100% { transform: scale(1); }
+}
+
+@keyframes log-label-hide {
+  0%, 12% { opacity: 1; transform: scale(1); }
+  22%, 55% { opacity: 0; transform: scale(0.76); }
+  76%, 100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes log-label-success {
+  0%, 12% { opacity: 0; transform: scale(0.76); }
+  24%, 54% { opacity: 1; transform: scale(1); }
+  76%, 100% { opacity: 0; transform: scale(0.86); }
+}
+
+@keyframes log-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--burst-x)), calc(-50% + var(--burst-y))) scale(0.7); }
 }
 
 .log-today-button:hover {
@@ -1610,12 +1693,48 @@ input[type="color"]:focus {
   z-index: 2;
 }
 
+.calendar-cell.is-celebrating::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  z-index: 0;
+  border: 2px solid rgba(79, 70, 229, 0.55);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: calendar-impact 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.activity-ring.is-celebrating {
+  animation: ring-arrival 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .activity-ring-segment {
   fill: none;
   stroke-width: 8;
   stroke-linecap: round;
   transform: rotate(-90deg);
   transform-origin: center;
+}
+
+.activity-ring-segment.is-new-log {
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 6px rgba(79, 70, 229, 0.55));
+  animation: new-log-glow 1050ms ease-out both;
+}
+
+@keyframes ring-arrival {
+  0% { opacity: 0.55; transform: rotate(0deg) scale(0.84); }
+  65% { opacity: 1; transform: rotate(306deg) scale(1.08); }
+  100% { opacity: 1; transform: rotate(360deg) scale(1); }
+}
+
+@keyframes calendar-impact {
+  0% { opacity: 0.85; transform: scale(0.68); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes new-log-glow {
+  0%, 45% { stroke-width: 10; opacity: 1; }
+  100% { stroke-width: 8; opacity: 1; }
 }
 
 .cell-month {
@@ -1658,6 +1777,27 @@ input[type="color"]:focus {
   padding: 5px;
   color: white;
   box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .log-today-button,
+  .log-today-button.is-celebrating,
+  .log-today-button.is-celebrating .log-button-default,
+  .log-today-button.is-celebrating .log-button-success,
+  .burst-particle,
+  .calendar-cell.is-celebrating::after,
+  .activity-ring.is-celebrating,
+  .activity-ring-segment.is-new-log {
+    animation: none;
+  }
+
+  .log-today-button.is-celebrating .log-button-default {
+    opacity: 0;
+  }
+
+  .log-today-button.is-celebrating .log-button-success {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 640px) {

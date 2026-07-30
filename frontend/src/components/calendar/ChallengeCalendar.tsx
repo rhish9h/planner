@@ -10,9 +10,10 @@ interface ChallengeCalendarProps {
   totalDays?: number
   scorecards: ScorecardData[]
   onDateSelect: (dateKey: string) => void
+  celebration: { areaId: string; dateKey: string } | null
 }
 
-const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, scorecards, onDateSelect }: ChallengeCalendarProps) => {
+const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, scorecards, onDateSelect, celebration }: ChallengeCalendarProps) => {
   const logCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     scorecards.forEach(card => {
@@ -27,6 +28,7 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
   const streamsByDate = useMemo(() => {
     const colors: Record<string, string[]> = {}
     const labels: Record<string, string[]> = {}
+    const areaIds: Record<string, string[]> = {}
     scorecards.forEach((card, index) => {
       const color = card.color || getDefaultScorecardColor(index)
       const seen = new Set<string>()
@@ -37,12 +39,14 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
         if (!colors[dateKey]) {
           colors[dateKey] = []
           labels[dateKey] = []
+          areaIds[dateKey] = []
         }
         colors[dateKey].push(color)
         labels[dateKey].push(card.area)
+        areaIds[dateKey].push(card.id)
       })
     })
-    return { colors, labels }
+    return { colors, labels, areaIds }
   }, [scorecards])
 
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -175,6 +179,8 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
           const isMonthStart = cell.isInRange && cell.date.getDate() === 1
           const streamColors = streamsByDate.colors[cell.dateKey] || []
           const streamLabels = streamsByDate.labels[cell.dateKey] || []
+          const streamAreaIds = streamsByDate.areaIds[cell.dateKey] || []
+          const isCelebrating = celebration?.dateKey === cell.dateKey
           const title = cell.isInRange
             ? `${cell.dateKey} · Day ${cell.dayNumber!}${streamLabels.length ? " · " + streamLabels.join(", ") : ""} · ${cell.count} logged`
             : ""
@@ -199,15 +205,15 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
                   onDateSelect(cell.dateKey)
                 }
               }}
-              className={`calendar-cell ${!cell.isInRange ? "outside" : cell.isFuture ? "future" : ""} ${cell.isToday && cell.isInRange ? "today" : ""}`}
+              className={`calendar-cell ${!cell.isInRange ? "outside" : cell.isFuture ? "future" : ""} ${cell.isToday && cell.isInRange ? "today" : ""} ${isCelebrating ? "is-celebrating" : ""}`}
               title={title}
             >
               {streamColors.length > 0 && (
-                <svg className="activity-ring" viewBox="0 0 100 100" aria-hidden="true">
+                <svg className={`activity-ring ${isCelebrating ? "is-celebrating" : ""}`} viewBox="0 0 100 100" aria-hidden="true">
                   {streamColors.map((color, index) => (
                     <circle
                       key={`${color}-${index}`}
-                      className="activity-ring-segment"
+                      className={`activity-ring-segment ${isCelebrating && streamAreaIds[index] === celebration?.areaId ? "is-new-log" : ""}`}
                       cx="50"
                       cy="50"
                       r={ringRadius}
