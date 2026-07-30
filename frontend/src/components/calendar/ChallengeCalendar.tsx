@@ -100,15 +100,6 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
 
   const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-  const getHeatClass = (count: number, isFuture: boolean, isInRange: boolean) => {
-    if (!isInRange) return "outside"
-    if (isFuture) return "future"
-    if (count === 0) return "empty"
-    if (count === 1) return "level-1"
-    if (count <= 3) return "level-2"
-    return "level-3"
-  }
-
   const activeDays = useMemo(() => cells.filter(c => c.isInRange && c.count > 0).length, [cells])
   const longestStreak = useMemo(() => {
     let max = 0
@@ -133,14 +124,6 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
             {activeDays} active {activeDays === 1 ? "day" : "days"} · longest streak {longestStreak} {longestStreak === 1 ? "day" : "days"}
           </p>
           <div className="calendar-header-right">
-          <div className="calendar-legend">
-            <span className="legend-item"><span className="legend-swatch outside" /> Rest</span>
-            <span className="legend-item"><span className="legend-swatch empty" /> Missed</span>
-            <span className="legend-item"><span className="legend-swatch level-1" /> 1</span>
-            <span className="legend-item"><span className="legend-swatch level-2" /> 2–3</span>
-            <span className="legend-item"><span className="legend-swatch level-3" /> 4+</span>
-            <span className="legend-item"><span className="legend-swatch today" /> Today</span>
-          </div>
           <div className="calendar-settings">
             <button
               type="button"
@@ -216,7 +199,7 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
                   onDateSelect(cell.dateKey)
                 }
               }}
-              className={`calendar-cell ${getHeatClass(cell.count, cell.isFuture, cell.isInRange)} ${cell.isToday && cell.isInRange ? "today" : ""}`}
+              className={`calendar-cell ${!cell.isInRange ? "outside" : cell.isFuture ? "future" : ""} ${cell.isToday && cell.isInRange ? "today" : ""}`}
               title={title}
             >
               {streamColors.length > 0 && (
