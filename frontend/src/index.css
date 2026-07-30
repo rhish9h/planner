@@ -13,7 +13,7 @@ body {
 }
 
 .dashboard {
-  width: min(100%, 1280px);
+  width: min(100%, 1440px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -22,7 +22,7 @@ body {
 
 .dashboard-content {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(580px, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -1449,12 +1449,7 @@ input[type="color"]:focus {
 }
 
 .calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+  margin-bottom: 8px;
 }
 
 .calendar-header h3 {
@@ -1469,10 +1464,16 @@ input[type="color"]:focus {
   color: var(--muted);
 }
 
+.calendar-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .calendar-legend {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 6px;
   align-items: center;
   font-size: 11px;
   color: var(--muted);
@@ -1518,9 +1519,9 @@ input[type="color"]:focus {
 .calendar-header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .calendar-settings {
@@ -1605,7 +1606,7 @@ input[type="color"]:focus {
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, minmax(24px, 44px));
-  gap: 4px;
+  gap: 10px;
   margin-bottom: 4px;
   justify-content: center;
 }
@@ -1622,7 +1623,7 @@ input[type="color"]:focus {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(24px, 44px));
-  gap: 4px;
+  gap: 10px;
   justify-content: center;
 }
 
@@ -1645,16 +1646,21 @@ input[type="color"]:focus {
   overflow: visible;
 }
 
-.calendar-cell::before {
-  content: "";
+.activity-ring {
   position: absolute;
-  inset: -4px;
-  background: var(--ring-gradient, transparent);
+  inset: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
   pointer-events: none;
-  border-radius: 50%;
-  -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
-  mask: radial-gradient(circle closest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
   z-index: 2;
+}
+
+.activity-ring-segment {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
 }
 
 .cell-month {
@@ -1719,12 +1725,14 @@ input[type="color"]:focus {
 }
 
 @media (max-width: 640px) {
-  .calendar-header {
+  .calendar-meta-row {
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .calendar-legend {
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .calendar-grid {

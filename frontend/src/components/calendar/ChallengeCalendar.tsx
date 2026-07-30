@@ -38,10 +38,8 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
           colors[dateKey] = []
           labels[dateKey] = []
         }
-        if (!colors[dateKey].includes(color)) {
-          colors[dateKey].push(color)
-          labels[dateKey].push(card.area)
-        }
+        colors[dateKey].push(color)
+        labels[dateKey].push(card.area)
       })
     })
     return { colors, labels }
@@ -129,13 +127,12 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
   return (
     <div className="challenge-calendar">
       <div className="calendar-header">
-        <div>
-          <h3>90-Day Challenge</h3>
+        <h3>90-Day Challenge</h3>
+        <div className="calendar-meta-row">
           <p className="calendar-subtitle">
             {activeDays} active {activeDays === 1 ? "day" : "days"} · longest streak {longestStreak} {longestStreak === 1 ? "day" : "days"}
           </p>
-        </div>
-        <div className="calendar-header-right">
+          <div className="calendar-header-right">
           <div className="calendar-legend">
             <span className="legend-item"><span className="legend-swatch outside" /> Rest</span>
             <span className="legend-item"><span className="legend-swatch empty" /> Missed</span>
@@ -180,6 +177,7 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
               </div>
             )}
           </div>
+          </div>
         </div>
       </div>
 
@@ -197,13 +195,15 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
           const title = cell.isInRange
             ? `${cell.dateKey} · Day ${cell.dayNumber!}${streamLabels.length ? " · " + streamLabels.join(", ") : ""} · ${cell.count} logged`
             : ""
-          const ringGradient = streamColors.length
-            ? `conic-gradient(${streamColors.map((color, i) => {
-              const start = i * (360 / streamColors.length)
-              const end = (i + 1) * (360 / streamColors.length)
-              return `${color} ${start}deg ${end}deg`
-            }).join(", ")})`
-            : undefined
+          const ringRadius = 44
+          const ringCircumference = 2 * Math.PI * ringRadius
+          const ringSegmentLength = streamColors.length
+            ? ringCircumference / streamColors.length
+            : 0
+          // Leave enough room for visibly separate rounded segment ends.
+          const ringGapLength = streamColors.length
+            ? ringCircumference * (Math.min(18, (360 / streamColors.length) * 0.4) / 360)
+            : 0
           return (
             <div
               key={idx}
@@ -218,8 +218,24 @@ const ChallengeCalendar = ({ startDate, onStartDateChange, totalDays = 90, score
               }}
               className={`calendar-cell ${getHeatClass(cell.count, cell.isFuture, cell.isInRange)} ${cell.isToday && cell.isInRange ? "today" : ""}`}
               title={title}
-              style={ringGradient ? ({ "--ring-gradient": ringGradient } as React.CSSProperties) : undefined}
             >
+              {streamColors.length > 0 && (
+                <svg className="activity-ring" viewBox="0 0 100 100" aria-hidden="true">
+                  {streamColors.map((color, index) => (
+                    <circle
+                      key={`${color}-${index}`}
+                      className="activity-ring-segment"
+                      cx="50"
+                      cy="50"
+                      r={ringRadius}
+                      pathLength="1"
+                      stroke={color}
+                      strokeDasharray={`${(ringSegmentLength - ringGapLength) / ringCircumference} 1`}
+                      strokeDashoffset={-(index * ringSegmentLength) / ringCircumference}
+                    />
+                  ))}
+                </svg>
+              )}
               {cell.isInRange && (
                 <>
                   {isMonthStart && (
